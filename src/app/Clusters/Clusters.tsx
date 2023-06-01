@@ -1,61 +1,76 @@
 /* eslint-disable no-console */
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { TableComposable, Thead, Tr, Th, Tbody, Td, ExpandableRowContent } from '@patternfly/react-table';
 import { Card, Label, PageSection } from '@patternfly/react-core';
+
 interface Cluster {
   name: string;
   provider: string;
   status: string;
+  instances: Instance[];
   nodes: number;
+  consoleLink: string;
   nestedComponent?: React.ReactNode;
-  consoleLink?: React.ReactNode;
   noPadding?: boolean;
 }
-interface NestedCluster {
-  hostname: string;
-  role: string;
-  status: string;
-  something1: string;
-  something2: string;
+interface Instance {
+  id: string;
+  name: string;
+  region: string;
+  instanceType: string;
+  state: string;
 }
 
-const NestedClustersTable: React.FunctionComponent = () => {
-  const clusterInfo: NestedCluster[] = [
-    { hostname: 'master-1', role: 'Master', status: 'Running', something1: '5', something2: '2 days ago' },
-    { hostname: 'master-2', role: 'Master', status: 'Down', something1: '5', something2: '2 days ago' },
-    { hostname: 'master-3', role: 'Master', status: 'Stopped', something1: '5', something2: '2 days ago' },
-    { hostname: 'worker-1', role: 'Worker', status: 'Needs Maintenance', something1: '5', something2: '2 days ago' },
-    { hostname: 'worker-2', role: 'Worker', status: 'Stopped', something1: '5', something2: '2 days ago' },
-    { hostname: 'worker-3', role: 'Worker', status: 'Running', something1: '5', something2: '2 days ago' },
-  ];
+interface InstancesTableProps {
+  instancesInfo: Instance[];
+}
 
+const fetchClusterData = async () => {
+  try {
+    const response = await axios.get('http://localhost:8080/clusterMock');
+    const clusters: Cluster[] = response.data.map((cluster: Cluster) => {
+      return {
+        ...cluster,
+        nodes: cluster.instances.length,
+        nestedComponent: <NestedInstancesTable instancesInfo={cluster.instances} />,
+      };
+    });
+    return clusters;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    return [];
+  }
+};
+
+const NestedInstancesTable: React.FunctionComponent<InstancesTableProps> = ({ instancesInfo }) => {
   const columnNames = {
-    hostname: 'Hostname',
-    role: 'Roles',
-    status: 'Status',
-    something1: 'Something1',
-    something2: 'Something2',
+    id: 'ID',
+    name: 'Name',
+    instanceType: 'Type',
+    region: 'Region',
+    state: 'State',
   };
 
   return (
     <TableComposable aria-label="Simple table" variant="compact">
       <Thead>
         <Tr>
-          <Th>{columnNames.hostname}</Th>
-          <Th>{columnNames.role}</Th>
-          <Th>{columnNames.status}</Th>
-          <Th>{columnNames.something1}</Th>
-          <Th>{columnNames.something2}</Th>
+          <Th width={20}>{columnNames.id}</Th>
+          <Th width={20}>{columnNames.name}</Th>
+          <Th width={20}>{columnNames.instanceType}</Th>
+          <Th width={20}>{columnNames.region}</Th>
+          <Th width={20}>{columnNames.state}</Th>
         </Tr>
       </Thead>
       <Tbody>
-        {clusterInfo.map((cluster) => (
-          <Tr key={cluster.hostname}>
-            <Td dataLabel={columnNames.hostname}>{cluster.hostname}</Td>
-            <Td dataLabel={columnNames.role}>{cluster.role}</Td>
-            <Td dataLabel={columnNames.status}>{cluster.status}</Td>
-            <Td dataLabel={columnNames.something1}>{cluster.something1}</Td>
-            <Td dataLabel={columnNames.something2}>{cluster.something2}</Td>
+        {instancesInfo.map((instance) => (
+          <Tr key={instance.id}>
+            <Td dataLabel={columnNames.id}>{instance.id}</Td>
+            <Td dataLabel={columnNames.name}>{instance.name}</Td>
+            <Td dataLabel={columnNames.instanceType}>{instance.instanceType}</Td>
+            <Td dataLabel={columnNames.region}>{instance.region}</Td>
+            <Td dataLabel={columnNames.state}>{instance.state}</Td>
           </Tr>
         ))}
       </Tbody>
@@ -64,24 +79,16 @@ const NestedClustersTable: React.FunctionComponent = () => {
 };
 
 const Clusters = () => {
-  const clusters: Cluster[] = [
-    {
-      name: 'Cluster 1',
-      provider: 'AWS',
-      status: 'Running',
-      nodes: 6,
-      nestedComponent: <NestedClustersTable />,
-      consoleLink: <a>Console</a>,
-    },
-    {
-      name: 'Cluster 2',
-      provider: 'Google',
-      status: 'Stopped',
-      nodes: 3,
-      nestedComponent: <NestedClustersTable />,
-      consoleLink: <a>Console</a>,
-    },
-  ];
+  const [clusters, setClusters] = useState<Cluster[]>([]);
+
+  useEffect(() => {
+    const fetchDataAndSetData = async () => {
+      const fetchedData = await fetchClusterData();
+      setClusters(fetchedData);
+    };
+
+    fetchDataAndSetData();
+  }, []);
 
   const columnNames = {
     name: 'Cluster',
@@ -120,11 +127,11 @@ const Clusters = () => {
             <Thead>
               <Tr>
                 <Td />
-                <Th>{columnNames.name}</Th>
-                <Th>{columnNames.provider}</Th>
-                <Th>{columnNames.status}</Th>
-                <Th>{columnNames.nodes}</Th>
-                <Th>{columnNames.link}</Th>
+                <Th width={20}>{columnNames.name}</Th>
+                <Th width={20}>{columnNames.provider}</Th>
+                <Th width={20}>{columnNames.status}</Th>
+                <Th width={20}>{columnNames.nodes}</Th>
+                <Th width={20}>{columnNames.link}</Th>
               </Tr>
             </Thead>
             {clusters.map((cluster, rowIndex) => (
@@ -146,7 +153,11 @@ const Clusters = () => {
                   <Td dataLabel={columnNames.provider}>{cluster.provider}</Td>
                   <Td dataLabel={columnNames.status}>{renderLabel(cluster.status)}</Td>
                   <Td dataLabel={columnNames.nodes}>{cluster.nodes}</Td>
-                  <Td dataLabel={columnNames.link}>{cluster.consoleLink}</Td>
+                  <Td dataLabel={columnNames.link}>
+                    <a href={cluster.consoleLink} target="_blank" rel="noopener noreferrer">
+                      Web console
+                    </a>
+                  </Td>
                 </Tr>
                 {cluster.nestedComponent ? (
                   <Tr isExpanded={isClusterExpanded(cluster)}>
