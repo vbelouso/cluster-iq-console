@@ -6,22 +6,34 @@ import { Card, Label, PageSection } from '@patternfly/react-core';
 
 interface Cluster {
   name: string;
+  accountName: string;
   provider: string;
   status: string;
+  region: string;
+  consoleLink: string;
   instances: Instance[];
   nodes: number;
-  consoleLink: string;
   nestedComponent?: React.ReactNode;
   noPadding?: boolean;
+
 }
+
 interface Instance {
   id: string;
   name: string;
   region: string;
   instanceType: string;
   state: string;
-}
+  nestedComponent?: React.ReactNode;
+  tags: Tag[];
+  noPadding?: boolean;
 
+
+}
+interface Tag {
+  key: string;
+  value: string;
+}
 interface InstancesTableProps {
   instancesInfo: Instance[];
 }
@@ -36,6 +48,7 @@ const fetchClusterData = async () => {
         nestedComponent: <NestedInstancesTable instancesInfo={cluster.instances} />,
       };
     });
+    console.log(clusters);
     return clusters;
   } catch (error) {
     console.error('Error fetching data:', error);
@@ -93,6 +106,7 @@ const Clusters = () => {
   const columnNames = {
     name: 'Cluster',
     provider: 'Provider',
+    accountName: 'accountName',
     status: 'Status',
     nodes: 'Nodes',
     link: 'Link',
@@ -127,11 +141,12 @@ const Clusters = () => {
             <Thead>
               <Tr>
                 <Td />
-                <Th width={20}>{columnNames.name}</Th>
-                <Th width={20}>{columnNames.provider}</Th>
-                <Th width={20}>{columnNames.status}</Th>
-                <Th width={20}>{columnNames.nodes}</Th>
-                <Th width={20}>{columnNames.link}</Th>
+                <Th width={15}>{columnNames.name}</Th>
+                <Th width={15}>{columnNames.accountName}</Th>
+                <Th width={15}>{columnNames.provider}</Th>
+                <Th width={15}>{columnNames.status}</Th>
+                <Th width={15}>{columnNames.nodes}</Th>
+                <Th width={15}>{columnNames.link}</Th>
               </Tr>
             </Thead>
             {clusters.map((cluster, rowIndex) => (
@@ -144,12 +159,14 @@ const Clusters = () => {
                             rowIndex,
                             isExpanded: isClusterExpanded(cluster),
                             onToggle: () => setClusterExpanded(cluster, !isClusterExpanded(cluster)),
-                            expandId: 'composable-nested-table-expandable-example',
+                            expandId: `composable_nested_table_expandable_example_${rowIndex}`,
                           }
                         : undefined
                     }
                   />
+
                   <Td dataLabel={columnNames.name}>{cluster.name}</Td>
+                  <Td dataLabel={columnNames.accountName}>{cluster.accountName}</Td>
                   <Td dataLabel={columnNames.provider}>{cluster.provider}</Td>
                   <Td dataLabel={columnNames.status}>{renderLabel(cluster.status)}</Td>
                   <Td dataLabel={columnNames.nodes}>{cluster.nodes}</Td>
