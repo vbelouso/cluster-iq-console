@@ -40,7 +40,7 @@ interface InstancesTableProps {
 
 const fetchClusterData = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/clusterMock');
+    const response = await axios.get('http://localhost:8080/clusters');
     const clusters: Cluster[] = response.data.map((cluster: Cluster) => {
       return {
         ...cluster,
@@ -130,6 +130,8 @@ const Clusters = () => {
         return <Label color="blue">{labelText}</Label>;
       case 'Down':
         return <Label color="red">{labelText}</Label>;
+      default:
+        return <Label color="grey">{labelText}</Label>;
     }
   };
 
