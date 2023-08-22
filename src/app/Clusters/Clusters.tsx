@@ -40,7 +40,25 @@ interface InstancesTableProps {
 
 const fetchClusterData = async () => {
   try {
-    const response = await axios.get('http://localhost:8080/clusters');
+    //const url = 'https://' + process.env.OCP_INV_API_PUBLIC_HOST + ':' + process.env.OCP_INV_API_PUBLIC_PORT + '/clusters';
+    //const url = 'https://api-cloud-inventory.apps.ocp-dev01.lab.eng.tlv2.redhat.com/clusters'
+    const url = process.env.OCP_INV_API_PUBLIC_ENDPOINT
+
+    //const response = await fetch(url + "/clusters", {
+    //  method: 'GET',
+    //  mode: 'cors',
+    //  credentials: 'same-origin',
+    //  headers: {
+    //    "Content-Type": "application/json",
+    //    "Access-Control-Allow-Origin": "*",
+    //  },
+    //  redirect: "follow",
+    //  referrerPolicy: "no-referrer",
+    //});
+    //const data = await response.json();
+    //console.log(data);
+    //const clusters: Cluster[] = data.map((cluster: Cluster) => {
+    const response = await axios.get(url + '/clusters');
     const clusters: Cluster[] = response.data.map((cluster: Cluster) => {
       return {
         ...cluster,

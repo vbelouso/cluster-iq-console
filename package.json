@@ -1,7 +1,7 @@
 {
   "name": "cluster-iq",
   "version": "0.0.1",
-  "description": "An open source tool for <PLACEHOLDER>",
+  "description": "An open source tool for Openshift Inventory UI",
   "repository": "https://github.com/r2dedios/ocp_inventory_ui",
   "homepage": "https://github.com/r2dedios/ocp_inventory_ui",
   "license": "MIT",
@@ -34,7 +34,7 @@
     "@storybook/addons": "^6.2.9",
     "@storybook/react": "^6.2.9",
     "@types/enzyme": "^3.10.8",
-    "@types/jest": "^26.0.23",
+    "@types/jest": "^27.0.0",
     "@types/react-router-dom": "^5.1.7",
     "@types/victory": "^33.1.4",
     "@typescript-eslint/eslint-plugin": "^4.26.1",
@@ -85,6 +85,7 @@
     "@patternfly/react-table": "^4.113.0",
     "@storybook/builder-webpack5": "^6.2.9",
     "axios": "^1.4.0",
+    "cors": "^2.8.5",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "sirv-cli": "^1.0.12"

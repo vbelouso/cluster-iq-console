@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { Route, RouteComponentProps, Switch, useLocation } from 'react-router-dom';
-import { ClustersMock as ClustersMock } from '@app/ClustersMock/ClustersMock';
 import { NotFound } from '@app/NotFound/NotFound';
 import { useDocumentTitle } from '@app/utils/useDocumentTitle';
 import { Clusters } from '@app/Clusters/Clusters';
@@ -32,13 +31,6 @@ const routes: AppRouteConfig[] = [
     label: 'Dashboard',
     path: '/',
     title: 'ClusterIQ | Dashboard Page',
-  },
-  {
-    component: ClustersMock,
-    exact: true,
-    label: 'ClustersMock',
-    path: '/clustersMock',
-    title: 'ClusterIQ | ClustersMock Page',
   },
   {
     component: Clusters,
