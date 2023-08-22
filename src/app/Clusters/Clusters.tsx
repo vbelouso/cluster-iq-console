@@ -40,8 +40,6 @@ interface InstancesTableProps {
 
 const fetchClusterData = async () => {
   try {
-    //const url = 'https://' + process.env.OCP_INV_API_PUBLIC_HOST + ':' + process.env.OCP_INV_API_PUBLIC_PORT + '/clusters';
-    //const url = 'https://api-cloud-inventory.apps.ocp-dev01.lab.eng.tlv2.redhat.com/clusters'
     const url = process.env.OCP_INV_API_PUBLIC_ENDPOINT
 
     //const response = await fetch(url + "/clusters", {
