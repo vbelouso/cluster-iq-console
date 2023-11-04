@@ -14,12 +14,7 @@ COPY . .
 ENV OCP_INV_API_HOST="0.0.0.0"
 ENV OCP_INV_API_PORT="8080"
 ENV OCP_INV_API_PUBLIC_ENDPOINT="https://api-cloud-inventory.apps.ocp-dev01.lab.eng.tlv2.redhat.com"
-ENV OCP_INV_DB_HOST="redis"
-ENV OCP_INV_DB_PORT="6379"
-ENV OCP_INV_DB_PASS=""
-ENV OCP_INV_CLOUD_CREDS="/credentials/credentials"
-ENV AWS_SHARED_CREDENTIALS_FILE="/credentials/credentials"
-RUN npm install --save &&\
+RUN npm install --save-prod &&\
   npm run build --legacy-peer-deps
 
 EXPOSE 8080
