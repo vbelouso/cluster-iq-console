@@ -1,108 +1,84 @@
-import * as React from 'react';
-import { NavLink, useLocation, useHistory } from 'react-router-dom';
+import * as React from "react";
 import {
-  Nav,
-  NavList,
-  NavItem,
-  NavExpandable,
   Page,
-  PageHeader,
+  Masthead,
+  MastheadToggle,
+  MastheadMain,
+  MastheadBrand,
   PageSidebar,
-  SkipToContent,
-} from '@patternfly/react-core';
-import { routes, IAppRoute, IAppRouteGroup } from '@app/routes';
-import logo from '@app/bgimages/logo.png';
+  PageSidebarBody,
+  PageToggleButton,
+  Nav,
+  NavItem,
+  NavList,
+} from "@patternfly/react-core";
+import BarsIcon from "@patternfly/react-icons/dist/esm/icons/bars-icon";
+import { RedhatIcon } from "@patternfly/react-icons";
 
 interface IAppLayout {
   children: React.ReactNode;
 }
 
 const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
-  const [isNavOpen, setIsNavOpen] = React.useState(true);
-  const [isMobileView, setIsMobileView] = React.useState(true);
-  const [isNavOpenMobile, setIsNavOpenMobile] = React.useState(false);
-  const onNavToggleMobile = () => {
-    setIsNavOpenMobile(!isNavOpenMobile);
-  };
-  const onNavToggle = () => {
-    setIsNavOpen(!isNavOpen);
-  };
-  const onPageResize = (props: { mobileView: boolean; windowSize: number }) => {
-    setIsMobileView(props.mobileView);
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
+
+  const onSidebarToggle = () => {
+    setIsSidebarOpen(!isSidebarOpen);
   };
 
-  function LogoImg() {
-    const history = useHistory();
-    function handleClick() {
-      history.push('/');
-    }
-    return <img src={logo} onClick={handleClick} alt="PatternFly Logo" />;
-  }
-
-  const Header = (
-    <PageHeader
-      logo={<LogoImg />}
-      showNavToggle
-      isNavOpen={isNavOpen}
-      onNavToggle={isMobileView ? onNavToggleMobile : onNavToggle}
-    />
+  const header = (
+    <Masthead>
+      <MastheadToggle>
+        <PageToggleButton
+          variant="plain"
+          aria-label="Global navigation"
+          isSidebarOpen={isSidebarOpen}
+          onSidebarToggle={onSidebarToggle}
+          id="vertical-nav-toggle"
+        >
+          <BarsIcon />
+        </PageToggleButton>
+      </MastheadToggle>
+      <MastheadMain>
+        <RedhatIcon style={{ color: 'red', fontSize: '2.8em' }} />
+        <MastheadBrand style={{ marginLeft: '10px', color:  'white', fontSize: '2em' }} href="https://github.com/RHEcosystemAppEng/cluster-iq" target="_blank">
+        ClusterIQ
+        </MastheadBrand>
+      </MastheadMain>
+    </Masthead>
   );
 
-  const location = useLocation();
-
-  const renderNavItem = (route: IAppRoute, index: number) => (
-    <NavItem key={`${route.label}-${index}`} id={`${route.label}-${index}`} isActive={route.path === location.pathname}>
-      <NavLink exact={route.exact} to={route.path}>
-        {route.label}
-      </NavLink>
-    </NavItem>
-  );
-
-  const renderNavGroup = (group: IAppRouteGroup, groupIndex: number) => (
-    <NavExpandable
-      key={`${group.label}-${groupIndex}`}
-      id={`${group.label}-${groupIndex}`}
-      title={group.label}
-      isActive={group.routes.some((route) => route.path === location.pathname)}
-    >
-      {group.routes.map((route, idx) => route.label && renderNavItem(route, idx))}
-    </NavExpandable>
-  );
-
-  const Navigation = (
-    <Nav id="nav-primary-simple" theme="dark">
-      <NavList id="nav-list-simple">
-        {routes.map(
-          (route, idx) => route.label && (!route.routes ? renderNavItem(route, idx) : renderNavGroup(route, idx))
-        )}
+  const PageNav = (
+    <Nav aria-label="Nav">
+      <NavList>
+        <NavItem itemId={0} to="/">
+          Overview
+        </NavItem>
+        <NavItem itemId={1} to="/clusters">
+          Clusters
+        </NavItem>
+        <NavItem itemId={2} to="/servers">
+          Servers
+        </NavItem>
+        <NavItem itemId={3} to="/billing">
+          Billing
+        </NavItem>
+        <NavItem itemId={4} to="/clusterUsage">
+          Cluster Usage
+        </NavItem>
       </NavList>
     </Nav>
   );
-
-  const Sidebar = <PageSidebar theme="dark" nav={Navigation} isNavOpen={isMobileView ? isNavOpenMobile : isNavOpen} />;
-
-  const pageId = 'primary-app-container';
-
-  const PageSkipToContent = (
-    <SkipToContent
-      onClick={(event) => {
-        event.preventDefault();
-        const primaryContentContainer = document.getElementById(pageId);
-        primaryContentContainer && primaryContentContainer.focus();
-      }}
-      href={`#${pageId}`}
-    >
-      Skip to Content
-    </SkipToContent>
+  const sidebar = (
+    <PageSidebar isSidebarOpen={isSidebarOpen} id="vertical-sidebar">
+      <PageSidebarBody>{PageNav}</PageSidebarBody>
+    </PageSidebar>
   );
+
+  const pageId = "primary-app-container";
+
   return (
-    <Page
-      mainContainerId={pageId}
-      header={Header}
-      sidebar={Sidebar}
-      onPageResize={onPageResize}
-      skipToContent={PageSkipToContent}
-    >
+    <Page header={header} sidebar={sidebar} mainContainerId={pageId}>
       {children}
     </Page>
   );

@@ -1,217 +1,208 @@
-/* eslint-disable no-console */
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { TableComposable, Thead, Tr, Th, Tbody, Td, ExpandableRowContent } from '@patternfly/react-table';
-import { Card, Label, PageSection } from '@patternfly/react-core';
+import {
+  PageSection,
+  PageSectionVariants,
+  Panel,
+  ToolbarItem,
+  Toolbar,
+  ToolbarContent,
+  TextContent,
+  Text,
+  SearchInput,
+  Label,
+  Spinner,
+} from "@patternfly/react-core";
+import { Table, Thead, Tr, Th, Tbody, Td } from "@patternfly/react-table";
+import React, { useEffect, useState } from "react";
+import { Link, useLocation  } from "react-router-dom";
+import { getClusters } from "../services/api";
 
-interface Cluster {
+interface IClusters {
   name: string;
-  accountName: string;
+  status: string | null;
+  account: string | null;
   provider: string;
-  status: string;
   region: string;
+  instances: number;
   consoleLink: string;
-  instances: Instance[];
-  nodes: number;
-  nestedComponent?: React.ReactNode;
-  noPadding?: boolean;
-
 }
 
-interface Instance {
-  id: string;
-  name: string;
-  region: string;
-  instanceType: string;
-  state: string;
-  nestedComponent?: React.ReactNode;
-  tags: Tag[];
-  noPadding?: boolean;
+const TableToolbar: React.FunctionComponent<{onSearchChange: (value: string) => void;}> = ({ onSearchChange }) => {
+  const [value, setValue] = React.useState("");
 
-
-}
-interface Tag {
-  key: string;
-  value: string;
-}
-interface InstancesTableProps {
-  instancesInfo: Instance[];
-}
-
-const fetchClusterData = async () => {
-  try {
-    const url = process.env.OCP_INV_API_PUBLIC_ENDPOINT
-
-    //const response = await fetch(url + "/clusters", {
-    //  method: 'GET',
-    //  mode: 'cors',
-    //  credentials: 'same-origin',
-    //  headers: {
-    //    "Content-Type": "application/json",
-    //    "Access-Control-Allow-Origin": "*",
-    //  },
-    //  redirect: "follow",
-    //  referrerPolicy: "no-referrer",
-    //});
-    //const data = await response.json();
-    //console.log(data);
-    //const clusters: Cluster[] = data.map((cluster: Cluster) => {
-    const response = await axios.get(url + '/clusters');
-    const clusters: Cluster[] = response.data.map((cluster: Cluster) => {
-      return {
-        ...cluster,
-        nodes: cluster.instances.length,
-        nestedComponent: <NestedInstancesTable instancesInfo={cluster.instances} />,
-      };
-    });
-    console.log(clusters);
-    return clusters;
-  } catch (error) {
-    console.error('Error fetching data:', error);
-    return [];
-  }
-};
-
-const NestedInstancesTable: React.FunctionComponent<InstancesTableProps> = ({ instancesInfo }) => {
-  const columnNames = {
-    id: 'ID',
-    name: 'Name',
-    instanceType: 'Type',
-    region: 'Region',
-    state: 'State',
+  const onChange = (value: string) => {
+    setValue(value);
+    onSearchChange(value);
   };
 
   return (
-    <TableComposable aria-label="Simple table" variant="compact">
-      <Thead>
-        <Tr>
-          <Th width={20}>{columnNames.id}</Th>
-          <Th width={20}>{columnNames.name}</Th>
-          <Th width={20}>{columnNames.instanceType}</Th>
-          <Th width={20}>{columnNames.region}</Th>
-          <Th width={20}>{columnNames.state}</Th>
-        </Tr>
-      </Thead>
-      <Tbody>
-        {instancesInfo.map((instance) => (
-          <Tr key={instance.id}>
-            <Td dataLabel={columnNames.id}>{instance.id}</Td>
-            <Td dataLabel={columnNames.name}>{instance.name}</Td>
-            <Td dataLabel={columnNames.instanceType}>{instance.instanceType}</Td>
-            <Td dataLabel={columnNames.region}>{instance.region}</Td>
-            <Td dataLabel={columnNames.state}>{instance.state}</Td>
-          </Tr>
-        ))}
-      </Tbody>
-    </TableComposable>
+    <Toolbar id="table-toolbar">
+      <ToolbarContent>
+        <ToolbarItem variant="search-filter">
+          <SearchInput
+            aria-label="Search by name..."
+            placeholder="Search by name..."
+            value={value}
+            onChange={(_event, value) => onChange(value)}
+            onClear={() => onChange("")}
+          />
+        </ToolbarItem>
+      </ToolbarContent>
+    </Toolbar>
   );
 };
 
-const Clusters = () => {
-  const [clusters, setClusters] = useState<Cluster[]>([]);
+const ClusterTable: React.FunctionComponent<{ searchValue: string, statusFilter: string | null, cloudProviderFilter: string | null }> = ({
+  searchValue,
+  statusFilter,
+  cloudProviderFilter,
+}) => {
+
+  const [clusterData, setClusterData] = useState<IClusters[] | []>([]);
+  const [filteredData, setFilteredData] = useState<IClusters[] | []>([]);
+  const [loading, setLoading] = useState(true);
+
 
   useEffect(() => {
-    const fetchDataAndSetData = async () => {
-      const fetchedData = await fetchClusterData();
-      setClusters(fetchedData);
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const fetchedClusters = await getClusters();
+        setClusterData(fetchedClusters.clusters);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    fetchDataAndSetData();
+    fetchData();
   }, []);
 
+  useEffect(() => {
+    let filtered = clusterData.filter((cluster) =>
+      cluster.name.toLowerCase().includes(searchValue.toLowerCase())
+    );
+
+    if (statusFilter) {
+      filtered = filtered.filter((cluster) => cluster.status === statusFilter);
+    }
+
+    if (cloudProviderFilter) {
+      console.log(cloudProviderFilter);
+      console.log(clusterData);
+      filtered = filtered.filter((cluster) => cluster.provider === cloudProviderFilter);
+    }
+
+    setFilteredData(filtered);
+      }, [searchValue, clusterData, statusFilter, cloudProviderFilter]);
+
   const columnNames = {
-    name: 'Cluster',
-    provider: 'Provider',
-    accountName: 'accountName',
-    status: 'Status',
-    nodes: 'Nodes',
-    link: 'Link',
+    name: "Name",
+    status: "Status",
+    account: "Account",
+    cloudProvider: "Cloud Provider",
+    region: "Region",
+    nodes: "Nodes",
+    console: "Web console",
   };
-
-  const [expandedClusterNames, setExpandedClusterNames] = React.useState<string[]>([]);
-  const setClusterExpanded = (cluster: Cluster, isExpanding = true) =>
-    setExpandedClusterNames((prevExpanded) => {
-      const otherExpandedClusterNames = prevExpanded.filter((r) => r !== cluster.name);
-      return isExpanding ? [...otherExpandedClusterNames, cluster.name] : otherExpandedClusterNames;
-    });
-  const isClusterExpanded = (cluster: Cluster) => expandedClusterNames.includes(cluster.name);
-
-  const renderLabel = (labelText: {} | null | undefined) => {
+  const renderLabel = (labelText: string | null | undefined) => {
     switch (labelText) {
-      case 'Running':
+      case "Running":
         return <Label color="green">{labelText}</Label>;
-      case 'Stopped':
-        return <Label color="orange">{labelText}</Label>;
-      case 'Needs Maintenance':
-        return <Label color="blue">{labelText}</Label>;
-      case 'Down':
+      case "Stopped":
         return <Label color="red">{labelText}</Label>;
       default:
-        return <Label color="grey">{labelText}</Label>;
+        return <Label color="gold">{labelText}</Label>;
     }
   };
 
   return (
     <React.Fragment>
-      <PageSection isFilled>
-        <Card>
-          <TableComposable aria-label="Clusters">
-            <Thead>
-              <Tr>
-                <Td />
-                <Th width={15}>{columnNames.name}</Th>
-                <Th width={15}>{columnNames.accountName}</Th>
-                <Th width={15}>{columnNames.provider}</Th>
-                <Th width={15}>{columnNames.status}</Th>
-                <Th width={15}>{columnNames.nodes}</Th>
-                <Th width={15}>{columnNames.link}</Th>
+      {loading ? (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100vh",
+          }}
+        >
+          <Spinner size="xl" />
+        </div>
+      ) : (
+        <Table aria-label="Simple table">
+          <Thead>
+            <Tr>
+              <Th>{columnNames.name}</Th>
+              <Th>{columnNames.status}</Th>
+              <Th>{columnNames.account}</Th>
+              <Th>{columnNames.cloudProvider}</Th>
+              <Th>{columnNames.region}</Th>
+              <Th>{columnNames.nodes}</Th>
+              <Th>{columnNames.console}</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {filteredData.map((cluster) => (
+              <Tr key={cluster.name}>
+                <Td dataLabel={columnNames.name}>
+                  <Link
+                    to={`/account/${cluster.accountName}/clusters/${cluster.name}?status=${cluster.status}`}
+                  >
+                    {cluster.name}
+                  </Link>
+                </Td>
+                <Td dataLabel={columnNames.status}>
+                  {renderLabel(cluster.status)}
+                </Td>
+                <Td dataLabel={columnNames.account}>{cluster.accountName}</Td>
+                <Td dataLabel={columnNames.cloudProvider}>
+                  {cluster.provider}
+                </Td>
+                <Td dataLabel={columnNames.region}>{cluster.region}</Td>
+                <Td dataLabel={columnNames.nodes}>
+                  {cluster.instanceCount}
+                </Td>
+                <Td dataLabel={columnNames.console}>
+                  <a
+                    href={cluster.consoleLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Console
+                  </a>
+                </Td>
               </Tr>
-            </Thead>
-            {clusters.map((cluster, rowIndex) => (
-              <Tbody key={cluster.name}>
-                <Tr>
-                  <Td
-                    expand={
-                      cluster.nestedComponent
-                        ? {
-                            rowIndex,
-                            isExpanded: isClusterExpanded(cluster),
-                            onToggle: () => setClusterExpanded(cluster, !isClusterExpanded(cluster)),
-                            expandId: `composable_nested_table_expandable_example_${rowIndex}`,
-                          }
-                        : undefined
-                    }
-                  />
-
-                  <Td dataLabel={columnNames.name}>{cluster.name}</Td>
-                  <Td dataLabel={columnNames.accountName}>{cluster.accountName}</Td>
-                  <Td dataLabel={columnNames.provider}>{cluster.provider}</Td>
-                  <Td dataLabel={columnNames.status}>{renderLabel(cluster.status)}</Td>
-                  <Td dataLabel={columnNames.nodes}>{cluster.nodes}</Td>
-                  <Td dataLabel={columnNames.link}>
-                    <a href={cluster.consoleLink} target="_blank" rel="noopener noreferrer">
-                      Web console
-                    </a>
-                  </Td>
-                </Tr>
-                {cluster.nestedComponent ? (
-                  <Tr isExpanded={isClusterExpanded(cluster)}>
-                    <Td
-                      noPadding={cluster.noPadding}
-                      dataLabel={`${columnNames.name} expended`}
-                      colSpan={Object.keys(columnNames).length + 1}
-                    >
-                      <ExpandableRowContent>{cluster.nestedComponent}</ExpandableRowContent>
-                    </Td>
-                  </Tr>
-                ) : null}
-              </Tbody>
             ))}
-          </TableComposable>
-        </Card>
+          </Tbody>
+        </Table>
+      )}
+    </React.Fragment>
+  );
+};
+
+const Clusters: React.FunctionComponent = () => {
+  const [searchValue, setSearchValue] = useState<string>("");
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const statusFilter = queryParams.get('status');
+  const cloudProviderFilter = queryParams.get('provider');
+
+  return (
+    <React.Fragment>
+      <PageSection variant={PageSectionVariants.light}>
+        <TextContent>
+          <Text component="h1">Clusters</Text>
+        </TextContent>
+      </PageSection>
+      <PageSection variant={PageSectionVariants.light} isFilled>
+        <Panel>
+          <TableToolbar onSearchChange={setSearchValue} />{" "}
+          <ClusterTable searchValue={searchValue} statusFilter={statusFilter} cloudProviderFilter={cloudProviderFilter} />{" "}
+        </Panel>
       </PageSection>
     </React.Fragment>
   );
 };
 
-export { Clusters };
+export default Clusters;
