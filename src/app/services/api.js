@@ -1,11 +1,9 @@
 import axios from "axios";
 
+const apiURL = process.env.REACT_APP_CIQ_API_URL
+
 const apiClient = axios.create({
-  // TO-DO use environment variables
-  // baseURL: "https://api-cluster-iq-vbelouso.apps.ocp-dev01.lab.eng.tlv2.redhat.com",
-  baseURL: "http://localhost:8081/api/v1",
-  // HARDCODED, CHANGE
-  // baseURL: "http://localhost:9000",
+  baseURL: apiURL,
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
