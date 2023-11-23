@@ -11,12 +11,13 @@ CONSOLE_IMAGE ?= $(REGISTRY)/$(REGISTRY_REPO)/${CONSOLE_IMG_NAME}
 # Help message
 define HELP_MSG
 Makefile Rules:
-	deploy: Deploys the application on the current context configured on Openshift/Kubernetes CLI
 	clean: Removes local container images
-	build: Builds every component it the repo: (API, AWS-Scanner)
+	compile: Builds the Console on local
+	build: Builds the Console on a Container image
 	push: Pushes every container image into remote repo
 	start-dev: Starts a local environment using 'docker/$(CONTAINER_ENGINE)-compose'
-	stop-dev: Stops the local environment using 'docker/$(CONTAINER_ENGINE)-compose'
+	test: Runs test
+	checks: Runs linters and format
 	help: Displays this message
 endef
 export HELP_MSG
@@ -46,9 +47,12 @@ push:
 	@$(CONTAINER_ENGINE) push $(CONSOLE_IMAGE):${VERSION}
 	@$(CONTAINER_ENGINE) push $(CONSOLE_IMAGE):${IMAGE_TAG}
 
+
+start-dev: export REACT_APP_CIQ_API_URL = http://localhost:8081/api/v1
 start-dev:
 	@echo "### [Starting project DEV MODE] ###"
-	@npm run start:dev
+	@echo "### [API-URL: $$REACT_APP_CIQ_API_URL] ###"
+	@npm run start
 
 test: checks
 	@echo "### [Running tests] ###"
@@ -61,3 +65,7 @@ lint:
 
 format:
 	@npm run format
+
+.DEFAULT_GOAL := help
+help:
+	echo "$$HELP_MSG"

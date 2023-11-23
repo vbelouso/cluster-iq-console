@@ -11,9 +11,6 @@ LABEL version=$VERSION
 LABEL description="Openshift Inventory API"
 
 COPY . .
-ENV OCP_INV_API_HOST="0.0.0.0"
-ENV OCP_INV_API_PORT="8080"
-ENV OCP_INV_API_PUBLIC_ENDPOINT="https://api-cloud-inventory.apps.ocp-dev01.lab.eng.tlv2.redhat.com"
 RUN npm install --save-prod &&\
   npm run build --legacy-peer-deps
 
