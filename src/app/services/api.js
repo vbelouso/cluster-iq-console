@@ -12,15 +12,15 @@ const apiClient = axios.create({
 
 
 
-// Fetch mocked clusters
+// Fetch cluster by name
 export async function getCluster(ClusterName) {
-      try {
-        const response = await apiClient.get(`/clusters/${ClusterName}`);
-        return response.data;
-      } catch (error) {
-        console.error("Error fetching mocked clusters:", error);
-        throw error;
-      }
+    try {
+      const response = await apiClient.get(`/clusters/${ClusterName}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching mocked clusters:", error);
+      throw error;
+    }
 }
 
 // Fetch clusters
@@ -33,6 +33,17 @@ export const getClusters = async () => {
     throw error;
   }
 };
+
+// Fetch account by name
+export async function getAccountByName(AccountName) {
+  try {
+    const response = await apiClient.get(`/accounts/${AccountName}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching mocked accounts:", error);
+    throw error;
+  }
+}
 
 // Fetch accounts
 export const getAccounts = async () => {
@@ -61,7 +72,7 @@ export const getInstances = async () => {
 export async function getAccountClusters(accountName) {
   try {
     const response = await apiClient.get(`/accounts/${accountName}/clusters`);
-    return response.data;
+    return response.data.clusters;
   } catch (error) {
     console.error("Error fetching Instances:", error);
     throw error;

@@ -159,6 +159,47 @@ const AggregateStatusCards: React.FunctionComponent = () => {
           layout: "multiIcon",
         }
       ],
+      accountsPerProvider: [
+        {
+          title: "AWS Accounts",
+          content: [
+            {
+              count: clusterCounts["AWS"] || 0,
+              icon: (
+                <AwsIcon color="var(--pf-v5-global--danger-color--100)" />
+              ),
+              ref: "/accounts?provider=AWS",
+            },
+          ],
+          layout: "multiIcon",
+        },
+        {
+          title: "GCP accounts",
+          content: [
+            {
+              count: clusterCounts["GCP"] || 0,
+              icon: (
+                <CloudIcon color="var(--pf-v5-global--danger-color--100)" />
+              ),
+              ref: "/accounts?provider=GCP",
+            },
+          ],
+          layout: "multiIcon",
+        },
+        {
+          title: "Azure accounts",
+          content: [
+            {
+              count: clusterCounts["Azure"] || 0,
+              icon: (
+                <AzureIcon color="var(--pf-v5-global--danger-color--100)" />
+              ),
+              ref: "/accounts?provider=Azure",
+            },
+          ],
+          layout: "multiIcon",
+        }
+      ],
 
 
     };

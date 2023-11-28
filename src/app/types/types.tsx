@@ -13,6 +13,11 @@ export type Cluster = {
   instances: Instance[];
 };
 
+export type AccountData = {
+  count: number;
+  accounts: Account[];
+};
+
 export type Account = {
   name: string;
   provider: string;

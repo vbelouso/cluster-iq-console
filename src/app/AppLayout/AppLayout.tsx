@@ -54,17 +54,17 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         <NavItem itemId={0} to="/">
           Overview
         </NavItem>
-        <NavItem itemId={1} to="/clusters">
+        <NavItem itemId={1} to="/accounts">
+          Accounts
+        </NavItem>
+        <NavItem itemId={2} to="/clusters">
           Clusters
         </NavItem>
-        <NavItem itemId={2} to="/servers">
+        <NavItem itemId={3} to="/servers">
           Servers
         </NavItem>
-        <NavItem itemId={3} to="/billing">
+        <NavItem itemId={4} to="/billing">
           Billing
-        </NavItem>
-        <NavItem itemId={4} to="/clusterUsage">
-          Cluster Usage
         </NavItem>
       </NavList>
     </Nav>
