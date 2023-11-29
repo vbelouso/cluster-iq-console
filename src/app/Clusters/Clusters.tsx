@@ -42,18 +42,8 @@ import SortAmountDownIcon from '@patternfly/react-icons/dist/esm/icons/sort-amou
 import CubeIcon from '@patternfly/react-icons/dist/esm/icons/cube-icon';
 import DashboardWrapper from '@patternfly/react-core/src/demos/examples/DashboardWrapper';
 import EllipsisVIcon from '@patternfly/react-icons/dist/esm/icons/ellipsis-v-icon';
+import { Cluster } from "@app/types/types";
 
-
-interface IClusters {
-  id: string;
-  name: string;
-  status: string | null;
-  accountName: string | null;
-  provider: string;
-  region: string;
-  instanceCount: number;
-  consoleLink: string;
-}
 
 const TableToolbar: React.FunctionComponent<{onSearchChange: (value: string) => void;}> = ({ onSearchChange }) => {
   const [value, setValue] = React.useState("");
@@ -86,8 +76,8 @@ const ClusterTable: React.FunctionComponent<{ searchValue: string, statusFilter:
   cloudProviderFilter,
 }) => {
 
-  const [clusterData, setClusterData] = useState<IClusters[] | []>([]);
-  const [filteredData, setFilteredData] = useState<IClusters[] | []>([]);
+  const [clusterData, setClusterData] = useState<Cluster[] | []>([]);
+  const [filteredData, setFilteredData] = useState<Cluster[] | []>([]);
   const [loading, setLoading] = useState(true);
 
 
@@ -153,7 +143,7 @@ const ClusterTable: React.FunctionComponent<{ searchValue: string, statusFilter:
   // sort direction of the currently active column
   const [activeSortDirection, setActiveSortDirection] = React.useState<'asc' | 'desc' | undefined>('asc');
   // sort dropdown expansion
-  const getSortableRowValues = (cluster: IClusters): (string | number | null)[] => {
+  const getSortableRowValues = (cluster: Cluster): (string | number | null)[] => {
     const { id, name, status, accountName, provider, region, instanceCount, consoleLink } = cluster;
     return [id, name, status, accountName, provider, region, instanceCount, consoleLink];
   };
@@ -233,7 +223,7 @@ const ClusterTable: React.FunctionComponent<{ searchValue: string, statusFilter:
                   </Link>
                 </Td>
                 <Td dataLabel={columnNames.name}>
-                  {renderLabel(cluster.name)}
+                  {cluster.name}
                 </Td>
                 <Td dataLabel={columnNames.status}>
                   {renderLabel(cluster.status)}
