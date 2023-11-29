@@ -23,7 +23,7 @@ import {
 } from "@patternfly/react-core";
 import { Table, Thead, Tr, Th, Tbody, Td } from "@patternfly/react-table";
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { getInstances } from "../services/api";
 import { Instances } from "@app/types/types";
 import { FilterIcon } from "@patternfly/react-icons";
@@ -528,7 +528,7 @@ const ServersTable: React.FunctionComponent<ServersTableProps> = ({
     name: "Name",
     state: "Status",
     provider: "Provider",
-    region: "Region",
+    availabilityZone: "AZ",
     instanceType: "Type",
   };
 
@@ -564,7 +564,7 @@ const ServersTable: React.FunctionComponent<ServersTableProps> = ({
               <Th>{columnNames.name}</Th>
               <Th>{columnNames.state}</Th>
               <Th>{columnNames.provider}</Th>
-              <Th>{columnNames.region}</Th>
+              <Th>{columnNames.availabilityZone}</Th>
               <Th>{columnNames.instanceType}</Th>
             </Tr>
           </Thead>
@@ -572,7 +572,11 @@ const ServersTable: React.FunctionComponent<ServersTableProps> = ({
             {filteredData.instances.map((instance) => (
               <Tr key={instance.id}>
                 <Td dataLabel={columnNames.id} width={15}>
-                  {instance.id}
+                  <Link
+                    to={`/servers/${instance.id}`}
+                  >
+                    {instance.id}
+                  </Link>
                 </Td>
                 <Td dataLabel={columnNames.name} width={30}>
                   {instance.name}
@@ -581,7 +585,7 @@ const ServersTable: React.FunctionComponent<ServersTableProps> = ({
                   {renderLabel(instance.state)}
                 </Td>
                 <Td dataLabel={columnNames.provider}>{instance.provider}</Td>
-                <Td dataLabel={columnNames.region}>{instance.region}</Td>
+                <Td dataLabel={columnNames.availabilityZone}>{instance.availabilityZone}</Td>
                 <Td dataLabel={columnNames.instanceType}>
                   {instance.instanceType}
                 </Td>

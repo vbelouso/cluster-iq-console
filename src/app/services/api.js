@@ -13,9 +13,9 @@ const apiClient = axios.create({
 
 
 // Fetch cluster by name
-export async function getCluster(ClusterName) {
+export async function getCluster(clusterID) {
     try {
-      const response = await apiClient.get(`/clusters/${ClusterName}`);
+      const response = await apiClient.get(`/clusters/${clusterID}`);
       return response.data;
     } catch (error) {
       console.error("Error fetching mocked clusters:", error);
@@ -57,6 +57,17 @@ export const getAccounts = async () => {
 };
 
 // Fetch Instances
+export async function getInstanceByID(instanceID) {
+  try {
+    const response = await apiClient.get(`/instances/${instanceID}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching Instance By ID:", error);
+   throw error;
+  }
+}
+
+// Fetch Instances
 export const getInstances = async () => {
   try {
     const response = await apiClient.get("/instances");
@@ -80,17 +91,23 @@ export async function getAccountClusters(accountName) {
 }
 
 
-export async function getClusterInstances(accountName, clusterName) {
+export async function getClusterInstances(accountName, clusterID) {
     try {
-      const response = await apiClient.get(
-        // HARDCODED, CHANGE
-        `clusters/${clusterName}/instances`
-        // TO-DO in case we move to path parameters replace the above line with the below line
-        // `accounts/${accountName}/clusters/${clusterName}`
-      );
+      const response = await apiClient.get(`clusters/${clusterID}/instances`);
       return response.data.instances;
     } catch (error) {
       console.error("Error fetching Instances:", error);
+      throw error;
+    }
+}
+
+
+export async function getClusterTags(clusterID) {
+    try {
+      const response = await apiClient.get(`clusters/${clusterID}/tags`);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching Tags:", error);
       throw error;
     }
 }

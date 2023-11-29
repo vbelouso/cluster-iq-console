@@ -22,13 +22,11 @@ import {
 } from "@patternfly/react-core";
 import InfoCircleIcon from "@patternfly/react-icons/dist/js/icons/info-circle-icon";
 import { Table, Tbody, Td, Th, Thead, Tr } from "@patternfly/react-table";
-import { getCluster, getClusterInstances } from "../services/api";
-import { ClusterData, Instance } from "@app/types/types";
-import { useLocation  } from "react-router-dom";
+import { getCluster, getClusterInstances, getClusterTags } from "../services/api";
+import { ClusterData, Instance, Tag, TagData } from "@app/types/types";
+import { Link, useLocation  } from "react-router-dom";
 interface LabelGroupOverflowProps {
-  labels: {
-    text: string;
-  }[];
+  labels: Array<Tag>;
 }
 
 const renderLabel = (labelText: string | null | undefined) => {
@@ -46,8 +44,8 @@ const LabelGroupOverflow: React.FunctionComponent<LabelGroupOverflowProps> = ({
   labels,
 }) => (
   <LabelGroup>
-    {labels.map((label, index) => (
-      <Label key={index}>{label.text}</Label>
+    {labels.map(label => (
+      <Label key={label.key}>{label.key}: {label.value}</Label>
     ))}
   </LabelGroup>
 );
@@ -55,7 +53,7 @@ const LabelGroupOverflow: React.FunctionComponent<LabelGroupOverflowProps> = ({
 const AggregateInstancesPerCluster: React.FunctionComponent = () => {
   const [data, setData] = useState<Instance[] | []>([]);
   const [loading, setLoading] = useState(true);
-  const { clusterName } = useParams();
+  const { clusterID } = useParams();
   const { accountName } = useParams();
 
 
@@ -63,7 +61,7 @@ const AggregateInstancesPerCluster: React.FunctionComponent = () => {
     const fetchData = async () => {
       try {
           console.log("Fetching data...");
-          const fetchedInstancesPerCluster = await getClusterInstances(accountName,clusterName);
+          const fetchedInstancesPerCluster = await getClusterInstances(accountName,clusterID);
           console.log("Fetched data:", fetchedInstancesPerCluster);
           setData(fetchedInstancesPerCluster);
       } catch (error) {
@@ -99,17 +97,23 @@ const AggregateInstancesPerCluster: React.FunctionComponent = () => {
               <Th>ID</Th>
               <Th>Name</Th>
               <Th>Type</Th>
-              <Th>Region</Th>
+              <Th>AvailabilityZone</Th>
               <Th>State</Th>
             </Tr>
           </Thead>
           <Tbody>
             {data.map((instance) => (
               <Tr key={instance.id}>
-                <Td>{instance.id}</Td>
+                <Td dataLabel={instance.id}>
+                  <Link
+                    to={`/servers/${instance.id}`}
+                  >
+                    {instance.id}
+                  </Link>
+                </Td>
                 <Td>{instance.name}</Td>
                 <Td>{instance.instanceType}</Td>
-                <Td>{instance.region}</Td>
+                <Td>{instance.availabilityZone}</Td>
                 <Td dataLabel={instance.state}>
                   {renderLabel(instance.state)}
                 </Td>
@@ -123,8 +127,12 @@ const AggregateInstancesPerCluster: React.FunctionComponent = () => {
 };
 
 const ClusterDetails: React.FunctionComponent = () => {
-  const { clusterName } = useParams();
+  const { clusterID } = useParams();
   const [activeTabKey, setActiveTabKey] = React.useState(0);
+  const [tags, setTagData] = useState<TagData>({
+    count: 0,
+    tags: []
+  });
   const [cluster, setClusterData] = useState<ClusterData>({
     count: 0,
     clusters: []
@@ -136,8 +144,10 @@ const ClusterDetails: React.FunctionComponent = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-          const fetchedCluster = await getCluster(clusterName);
+          const fetchedCluster = await getCluster(clusterID);
           setClusterData(fetchedCluster);
+          const fetchedTags = await getClusterTags(clusterID);
+          setTagData(fetchedTags);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -188,7 +198,7 @@ const ClusterDetails: React.FunctionComponent = () => {
           <DescriptionListGroup>
             <DescriptionListTerm>Name</DescriptionListTerm>
             <DescriptionListDescription>
-              {cluster.clusters[0].name}
+              {clusterID}
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
@@ -205,6 +215,7 @@ const ClusterDetails: React.FunctionComponent = () => {
           </DescriptionListGroup>
           <DescriptionListGroup>
             <DescriptionListTerm>Labels</DescriptionListTerm>
+              <LabelGroupOverflow labels={tags.tags} />
           </DescriptionListGroup>
           <DescriptionListGroup>
             <DescriptionListTerm>Account</DescriptionListTerm>
@@ -221,7 +232,7 @@ const ClusterDetails: React.FunctionComponent = () => {
           <DescriptionListGroup>
             <DescriptionListTerm>Region</DescriptionListTerm>
             <DescriptionListDescription>
-              {cluster.clusters[0].region}
+              {cluster.clusters[0].region || "unknown"}
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
@@ -247,7 +258,7 @@ const ClusterDetails: React.FunctionComponent = () => {
 
   return (
     <Page>
-      
+
       {/* Page header */}
       <PageSection isWidthLimited variant={PageSectionVariants.light}>
 
@@ -257,18 +268,16 @@ const ClusterDetails: React.FunctionComponent = () => {
           flexWrap={{ default: "nowrap" }}
         >
 
-          
+
           <FlexItem>
-            <Label color="blue">CL</Label>
+            <Label color="blue">Cluster</Label>
           </FlexItem>
-          
           <FlexItem>
             <Title headingLevel="h1" size="2xl">
-              {/* {cluster.clusters[0].name} */}
+              {clusterID}
             </Title>
           </FlexItem>
           <FlexItem flex={{ default: "flexNone" }}>
-            {renderLabel(clusterStatus)}
           </FlexItem>
 
 

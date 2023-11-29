@@ -63,9 +63,6 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
         <NavItem itemId={3} to="/servers">
           Servers
         </NavItem>
-        <NavItem itemId={4} to="/billing">
-          Billing
-        </NavItem>
       </NavList>
     </Nav>
   );

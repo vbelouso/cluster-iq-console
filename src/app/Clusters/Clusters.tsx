@@ -147,9 +147,9 @@ const ClusterTable: React.FunctionComponent<{ searchValue: string, statusFilter:
               <Tr key={cluster.name}>
                 <Td dataLabel={columnNames.name}>
                   <Link
-                    to={`/accounts/${cluster.accountName}/clusters/${cluster.name}?status=${cluster.status}`}
+                    to={`/clusters/${cluster.id}`}
                   >
-                    {cluster.name}
+                    {cluster.id}
                   </Link>
                 </Td>
                 <Td dataLabel={columnNames.status}>

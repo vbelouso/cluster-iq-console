@@ -22,103 +22,31 @@ import {
 } from "@patternfly/react-core";
 import InfoCircleIcon from "@patternfly/react-icons/dist/js/icons/info-circle-icon";
 import { Table, Tbody, Td, Th, Thead, Tr } from "@patternfly/react-table";
-import { getAccountByName, getAccountClusters } from "../services/api";
+import { getInstances, getInstanceByID } from "../services/api";
 import { Link  } from "react-router-dom";
-import { AccountData, Cluster } from "@app/types/types";
+import { Instance, Instances, Tag } from "@app/types/types";
 import { useLocation  } from "react-router-dom";
 interface LabelGroupOverflowProps {
-  labels: {
-    text: string;
-  }[];
+  labels: Array<Tag>;
 }
 
 const LabelGroupOverflow: React.FunctionComponent<LabelGroupOverflowProps> = ({
   labels,
 }) => (
   <LabelGroup>
-    {labels.map((label, index) => (
-      <Label key={index}>{label.text}</Label>
+    {labels.map(label => (
+      <Label key={label.key}>{label.key}: {label.value}</Label>
     ))}
   </LabelGroup>
 );
 
-const AggregateClustersPerAccount: React.FunctionComponent = () => {
-  const [data, setData] = useState<Cluster[] | []>([]);
-  const [loading, setLoading] = useState(true);
-  const { accountName } = useParams();
 
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-          console.log("Fetching data...");
-          const fetchedAccountClusters = await getAccountClusters(accountName);
-          console.log("Fetched Account data:", fetchedAccountClusters);
-          setData(fetchedAccountClusters);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  console.log("Rendered with data:", data);
-
-  return (
-    <React.Fragment>
-      {loading ? (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100vh",
-          }}
-        >
-          <Spinner size="xl" />
-        </div>
-      ) : (
-        <Table aria-label="Simple table">
-          <Thead>
-            <Tr>
-              <Th>ID</Th>
-              <Th>Name</Th>
-              <Th>Provider</Th>
-              <Th>Instance Count</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {data.map((cluster) => (
-              <Tr key={cluster.name}>
-                <Td dataLabel={cluster.name}>
-                  <Link
-                    to={`/clusters/${cluster.id}`}
-                  >
-                    {cluster.id}
-                  </Link>
-                </Td>
-                <Td>{cluster.name}</Td>
-                <Td>{cluster.provider}</Td>
-                <Td>{cluster.instanceCount}</Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      )}
-    </React.Fragment>
-  );
-};
-
-const AccountDetails: React.FunctionComponent = () => {
-  const { accountName } = useParams();
+const ServerDetails: React.FunctionComponent = () => {
+  const { instanceID } = useParams();
   const [activeTabKey, setActiveTabKey] = React.useState(0);
-  const [accountData, setAccountData] = useState<AccountData>({
+  const [instanceData, setInstanceData] = useState<Instances>({
     count: 0,
-    accounts: []
+    instances: []
   });
   const [loading, setLoading] = useState(true);
   const location = useLocation();
@@ -126,10 +54,10 @@ const AccountDetails: React.FunctionComponent = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-          console.log("Fetching Account Clusters ", accountName);
-          const fetchedAccountClusters = await getAccountByName(accountName);
-          setAccountData(fetchedAccountClusters);
-          console.log("Fetched Account Clusters data:", accountData);
+          console.log("Fetching Account Clusters ", instanceID);
+          const fetchedInstance = await getInstanceByID(instanceID);
+          setInstanceData(fetchedInstance);
+          console.log("Fetched Account Clusters data:", instanceID);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -159,7 +87,7 @@ const AccountDetails: React.FunctionComponent = () => {
       >
         <Spinner size="xl" />
       </div>
-    ) : 
+    ) :
     (<Flex direction={{ default: "column" }}>
       <FlexItem spacer={{ default: "spacerLg" }}>
         <Title
@@ -168,7 +96,7 @@ const AccountDetails: React.FunctionComponent = () => {
           className="pf-v5-u-mt-sm"
           id="open-tabs-example-tabs-list-details-title"
         >
-          Cluster details
+          Server details
         </Title>
       </FlexItem>
 
@@ -180,32 +108,41 @@ const AccountDetails: React.FunctionComponent = () => {
           <DescriptionListGroup>
             <DescriptionListTerm>Name</DescriptionListTerm>
             <DescriptionListDescription>
-              {accountData.accounts[0].name}
+              {instanceID}
             </DescriptionListDescription>
-            <DescriptionListTerm>Account ID</DescriptionListTerm>
+            <DescriptionListTerm>Cluster ID</DescriptionListTerm>
             <DescriptionListDescription>
-              {accountData.accounts[0].id}
+              <Link
+                to={`/clusters/${instanceData.instances[0].clusterID}`}
+              >
+                {instanceData.instances[0].clusterID}
+              </Link>
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
             <DescriptionListTerm>Cloud Provider</DescriptionListTerm>
             <DescriptionListDescription>
-              {accountData.accounts[0].provider}
+              {instanceData.instances[0].provider}
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
             <DescriptionListTerm>Labels</DescriptionListTerm>
+              <LabelGroupOverflow labels={instanceData.instances[0].tags} />
           </DescriptionListGroup>
           <DescriptionListGroup>
             <DescriptionListTerm>Last scanned at</DescriptionListTerm>
             <DescriptionListDescription>
-              <time>Oct 15, 1:51 pm</time>
+              {instanceData.instances[0].tags.filter(label => label.key == "LaunchTime").map(label => (
+                <Label key={label.key}>{label.value}</Label>
+              ))}
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
             <DescriptionListTerm>Created at</DescriptionListTerm>
             <DescriptionListDescription>
-              <time>Oct 15, 1:51 pm</time>
+              {instanceData.instances[0].tags.filter(label => label.key == "LaunchTime").map(label => (
+                <Label key={label.key}>{label.value}</Label>
+              ))}
             </DescriptionListDescription>
           </DescriptionListGroup>
         </DescriptionList>
@@ -214,13 +151,6 @@ const AccountDetails: React.FunctionComponent = () => {
     </React.Fragment>
   );
 
-
-
-  const clustersTabContent = (
-    <TabContentBody>
-      <AggregateClustersPerAccount />
-    </TabContentBody>
-  );
 
 
   return (
@@ -236,11 +166,11 @@ const AccountDetails: React.FunctionComponent = () => {
         >
 
           <FlexItem>
-            <Label color="blue">Account</Label>
+            <Label color="blue">Server</Label>
           </FlexItem>
           <FlexItem>
             <Title headingLevel="h1" size="2xl">
-              {accountName}
+              {instanceID}
             </Title>
           </FlexItem>
 
@@ -264,11 +194,6 @@ const AccountDetails: React.FunctionComponent = () => {
             title={<TabTitleText>Details</TabTitleText>}
             tabContentId={`tabContent${0}`}
           />
-          <Tab
-            eventKey={1}
-            title={<TabTitleText>Clusters</TabTitleText>}
-            tabContentId={`tabContent${1}`}
-          />
         </Tabs>
       </PageSection>
       <PageSection isWidthLimited variant={PageSectionVariants.light}>
@@ -288,11 +213,10 @@ const AccountDetails: React.FunctionComponent = () => {
           activeKey={activeTabKey}
           hidden={1 !== activeTabKey}
         >
-          <TabContentBody>{clustersTabContent}</TabContentBody>
         </TabContent>
       </PageSection>
     </Page>
   );
 };
 
-export default AccountDetails;
+export default ServerDetails;

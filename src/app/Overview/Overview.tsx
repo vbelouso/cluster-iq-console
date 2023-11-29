@@ -17,7 +17,7 @@ import {
   Text,
 } from "@patternfly/react-core";
 import CheckCircleIcon from "@patternfly/react-icons/dist/js/icons/check-circle-icon";
-import { CloudIcon, AwsIcon, AzureIcon, ErrorCircleOIcon, WarningTriangleIcon } from "@patternfly/react-icons";
+import { OpenshiftIcon, KeyIcon, ClusterIcon, CloudIcon, AwsIcon, GoogleIcon, AzureIcon, ErrorCircleOIcon, WarningTriangleIcon } from "@patternfly/react-icons";
 import { getClusters, getAccounts, getInstances, getAccountClusters } from "../services/api";
 import { ClusterData, ClusterPerCP, Instances } from '../types/types';
 
@@ -68,6 +68,13 @@ const AggregateStatusCards: React.FunctionComponent = () => {
     clusterCounts[provider] = (clusterCounts[provider] || 0) + clusterCount;
   });
 
+  const accountCounts = {};
+  clusterPerCP.accounts.forEach(account => {
+    const provider = account.provider;
+    //const clusterCount = Object.keys(account.clusters).length;
+    accountCounts[provider] = (accountCounts[provider] || 0) + 1;
+  });
+
   // to-do instead of static structure of page content make it dynamic (lets saywe add tomorrow IBM cloud, we dont need to change the FE)
     const cardData = {
       clusters: [
@@ -102,7 +109,8 @@ const AggregateStatusCards: React.FunctionComponent = () => {
           title: "Servers",
           content: [
             {
-              count: instances.count
+              count: instances.count,
+              ref: "/servers"
             },
           ],
           layout: "multiIcon",
@@ -120,51 +128,17 @@ const AggregateStatusCards: React.FunctionComponent = () => {
       ],
       clustersPerProvider: [
         {
-          title: "AWS Clusters",
+          title: "AWS",
           content: [
             {
-              count: clusterCounts["AWS"] || 0,
+              count: (clusterCounts["AWS"] || 0) + " Cluster(s)",
               icon: (
-                <AwsIcon color="var(--pf-v5-global--danger-color--100)" />
+                <OpenshiftIcon color="var(--pf-v5-global--danger-color--100)" />
               ),
               ref: "/clusters?provider=AWS",
             },
-          ],
-          layout: "multiIcon",
-        },
-        {
-          title: "GCP Clusters",
-          content: [
             {
-              count: clusterCounts["GCP"] || 0,
-              icon: (
-                <CloudIcon color="var(--pf-v5-global--danger-color--100)" />
-              ),
-              ref: "/clusters?provider=GCP",
-            },
-          ],
-          layout: "multiIcon",
-        },
-        {
-          title: "Azure Clusters",
-          content: [
-            {
-              count: clusterCounts["Azure"] || 0,
-              icon: (
-                <AzureIcon color="var(--pf-v5-global--danger-color--100)" />
-              ),
-              ref: "/clusters?provider=Azure",
-            },
-          ],
-          layout: "multiIcon",
-        }
-      ],
-      accountsPerProvider: [
-        {
-          title: "AWS Accounts",
-          content: [
-            {
-              count: clusterCounts["AWS"] || 0,
+              count: (accountCounts["AWS"] || 0) + " Account(s)",
               icon: (
                 <AwsIcon color="var(--pf-v5-global--danger-color--100)" />
               ),
@@ -174,12 +148,19 @@ const AggregateStatusCards: React.FunctionComponent = () => {
           layout: "multiIcon",
         },
         {
-          title: "GCP accounts",
+          title: "GCP Clusters",
           content: [
             {
-              count: clusterCounts["GCP"] || 0,
+              count: (clusterCounts["GCP"] || 0) + " Cluster(s)",
               icon: (
-                <CloudIcon color="var(--pf-v5-global--danger-color--100)" />
+                <OpenshiftIcon color="var(--pf-v5-global--danger-color--100)" />
+              ),
+              ref: "/clusters?provider=GCP",
+            },
+            {
+              count: (accountCounts["GCP"] || 0) + " Account(s)",
+              icon: (
+                <GoogleIcon color="var(--pf-v5-global--danger-color--100)" />
               ),
               ref: "/accounts?provider=GCP",
             },
@@ -187,10 +168,17 @@ const AggregateStatusCards: React.FunctionComponent = () => {
           layout: "multiIcon",
         },
         {
-          title: "Azure accounts",
+          title: "Azure Clusters",
           content: [
             {
-              count: clusterCounts["Azure"] || 0,
+              count: (clusterCounts["Azure"] || 0) + " Cluster(s)",
+              icon: (
+                <OpenshiftIcon color="var(--pf-v5-global--danger-color--100)" />
+              ),
+              ref: "/clusters?provider=Azure",
+            },
+            {
+              count: (accountCounts["Azure"] || 0) + " Account(s)",
               icon: (
                 <AzureIcon color="var(--pf-v5-global--danger-color--100)" />
               ),
@@ -204,7 +192,7 @@ const AggregateStatusCards: React.FunctionComponent = () => {
 
     };
 
-    
+
     const renderContent = (title: string, content: any[], layout: string) => {
     if (layout === "icon") {
       return content[0].icon;
@@ -263,10 +251,11 @@ const AggregateStatusCards: React.FunctionComponent = () => {
             let cardAlign;
             let titleAlign;
             if (cardGroup === "withSubtitle") {
-              galleryWidth = "260px";
+              galleryWidth = "25%";
               cardAlign = "";
               titleAlign = "center";
             } else {
+              galleryWidth = "30%";
               cardAlign = "center";
             }
             return (

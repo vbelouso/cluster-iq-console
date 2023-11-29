@@ -19,13 +19,22 @@ export type AccountData = {
 };
 
 export type Account = {
+  id: string;
   name: string;
   provider: string;
   clusterCount: number;
   clusters: Record<string, Cluster>;
 };
 
+export type TagData = {
+  count: number;
+  tags: Tag[];
+}
 
+export type Tag = {
+  key: string;
+  value: string;
+}
 
 export type ClusterPerCP = {
   count: number;
@@ -35,14 +44,12 @@ export type ClusterPerCP = {
 export type Instance = {
     id: string;
     name: string;
-    region: string;
+    availabilityZone: string;
     instanceType: string;
     state: string;
+    clusterID: string;
     provider: string;
-    tags: Array<{
-        key: string;
-        value: string;
-    }>;
+    tags: Array<Tag>;
 }
 
 export type Instances = {
