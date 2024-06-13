@@ -8,13 +8,13 @@ ARG VERSION="0.1-alpha"
 
 # Labels
 LABEL version=$VERSION
-LABEL description="Openshift Inventory API"
+LABEL description="ClusterIQ API"
 
 COPY . .
 RUN npm install --save-prod &&\
   npm run build --legacy-peer-deps
 
-EXPOSE 8080
+EXPOSE 3000
 
 ENTRYPOINT ["npm", "run"]
 CMD ["start"]

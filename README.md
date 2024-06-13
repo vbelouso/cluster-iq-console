@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # ClusterIQ
 
 ClusterIQ is an open source tool for `PLACEHOLDER`.
@@ -18,7 +17,7 @@ npm install && npm run start:dev
 npm install
 
 # Start the development server
-npm run start:dev
+npm run start
 
 # Run a production build (outputs to "dist" dir)
 npm run build
@@ -114,7 +113,6 @@ ENV_2=http://2.myendpoint.com
 
 With that in place, you can use the values in your code like `console.log(process.env.ENV_1);`
 
-=======
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
@@ -161,4 +159,3 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
->>>>>>> nimer/clusters-v2

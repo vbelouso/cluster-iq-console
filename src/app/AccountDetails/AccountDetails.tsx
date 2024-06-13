@@ -168,7 +168,7 @@ const AccountDetails: React.FunctionComponent = () => {
           className="pf-v5-u-mt-sm"
           id="open-tabs-example-tabs-list-details-title"
         >
-          Cluster details
+          Account details
         </Title>
       </FlexItem>
 

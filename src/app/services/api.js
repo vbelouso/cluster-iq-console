@@ -1,9 +1,7 @@
 import axios from "axios";
 
-const apiURL = process.env.REACT_APP_CIQ_API_URL
-
 const apiClient = axios.create({
-  baseURL: apiURL,
+  baseURL: "/api", // API proxy path
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
