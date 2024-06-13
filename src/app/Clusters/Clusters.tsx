@@ -1,6 +1,8 @@
 import {
+
   PageSection,
   PageSectionVariants,
+  Pagination,
   Panel,
   ToolbarItem,
   Toolbar,
@@ -8,23 +10,40 @@ import {
   TextContent,
   Text,
   SearchInput,
+  MenuToggle,
+  MenuToggleElement,
   Label,
+  Select,
+  SelectList,
+  SelectGroup,
+  SelectOption,
+  OverflowMenu,
+  OverflowMenuGroup,
+  OverflowMenuContent,
+  OverflowMenuControl,
+  OverflowMenuItem,
+  OverflowMenuDropdownItem,
+  Button,
+  Dropdown,
+  ToolbarGroup,
+  DropdownList,
   Spinner,
 } from "@patternfly/react-core";
-import { Table, Thead, Tr, Th, Tbody, Td } from "@patternfly/react-table";
+import { Table, Thead, Tr, Th, Tbody, Td, ThProps } from "@patternfly/react-table";
 import React, { useEffect, useState } from "react";
 import { Link, useLocation  } from "react-router-dom";
 import { getClusters } from "../services/api";
+import CloneIcon from '@patternfly/react-icons/dist/esm/icons/clone-icon';
+import EditIcon from '@patternfly/react-icons/dist/esm/icons/edit-icon';
+import SyncIcon from '@patternfly/react-icons/dist/esm/icons/sync-icon';
+import CodeIcon from '@patternfly/react-icons/dist/esm/icons/code-icon';
+import CodeBranchIcon from '@patternfly/react-icons/dist/esm/icons/code-branch-icon';
+import SortAmountDownIcon from '@patternfly/react-icons/dist/esm/icons/sort-amount-down-icon';
+import CubeIcon from '@patternfly/react-icons/dist/esm/icons/cube-icon';
+import DashboardWrapper from '@patternfly/react-core/src/demos/examples/DashboardWrapper';
+import EllipsisVIcon from '@patternfly/react-icons/dist/esm/icons/ellipsis-v-icon';
+import { Cluster } from "@app/types/types";
 
-interface IClusters {
-  name: string;
-  status: string | null;
-  account: string | null;
-  provider: string;
-  region: string;
-  instances: number;
-  consoleLink: string;
-}
 
 const TableToolbar: React.FunctionComponent<{onSearchChange: (value: string) => void;}> = ({ onSearchChange }) => {
   const [value, setValue] = React.useState("");
@@ -57,8 +76,8 @@ const ClusterTable: React.FunctionComponent<{ searchValue: string, statusFilter:
   cloudProviderFilter,
 }) => {
 
-  const [clusterData, setClusterData] = useState<IClusters[] | []>([]);
-  const [filteredData, setFilteredData] = useState<IClusters[] | []>([]);
+  const [clusterData, setClusterData] = useState<Cluster[] | []>([]);
+  const [filteredData, setFilteredData] = useState<Cluster[] | []>([]);
   const [loading, setLoading] = useState(true);
 
 
@@ -96,15 +115,6 @@ const ClusterTable: React.FunctionComponent<{ searchValue: string, statusFilter:
     setFilteredData(filtered);
       }, [searchValue, clusterData, statusFilter, cloudProviderFilter]);
 
-  const columnNames = {
-    name: "Name",
-    status: "Status",
-    account: "Account",
-    cloudProvider: "Cloud Provider",
-    region: "Region",
-    nodes: "Nodes",
-    console: "Web console",
-  };
   const renderLabel = (labelText: string | null | undefined) => {
     switch (labelText) {
       case "Running":
@@ -115,6 +125,65 @@ const ClusterTable: React.FunctionComponent<{ searchValue: string, statusFilter:
         return <Label color="gold">{labelText}</Label>;
     }
   };
+
+  const columnNames = {
+    id: "ID",
+    name: "Name",
+    status: "Status",
+    account: "Account",
+    cloudProvider: "Cloud Provider",
+    region: "Region",
+    nodes: "Nodes",
+    console: "Web console",
+  };
+
+  //### Sorting ###
+  // Index of the currently active column
+  const [activeSortIndex, setActiveSortIndex] = React.useState<number | undefined>(0);
+  // sort direction of the currently active column
+  const [activeSortDirection, setActiveSortDirection] = React.useState<'asc' | 'desc' | undefined>('asc');
+  // sort dropdown expansion
+  const getSortableRowValues = (cluster: Cluster): (string | number | null)[] => {
+    const { id, name, status, accountName, provider, region, instanceCount, consoleLink } = cluster;
+    return [id, name, status, accountName, provider, region, instanceCount, consoleLink];
+  };
+
+  // Note that we perform the sort as part of the component's render logic and not in onSort.
+  // We shouldn't store the list of data in state because we don't want to have to sync that with props.
+  let sortedData = filteredData;
+  if (typeof activeSortIndex === 'number' && activeSortIndex !== null) {
+    sortedData = filteredData.sort((a, b) => {
+      const aValue = getSortableRowValues(a)[activeSortIndex];
+      const bValue = getSortableRowValues(b)[activeSortIndex];
+      if (typeof aValue === 'number') {
+        // Numeric sort
+        if (activeSortDirection === 'asc') {
+          return (aValue as number) - (bValue as number);
+        }
+        return (bValue as number) - (aValue as number);
+      } else {
+        // String sort
+        if (activeSortDirection === 'asc') {
+          return (aValue as string).localeCompare(bValue as string);
+        }
+        return (bValue as string).localeCompare(aValue as string);
+      }
+    });
+  }
+
+  const getSortParams = (columnIndex: number): ThProps['sort'] => ({
+    sortBy: {
+      index: activeSortIndex,
+      direction: activeSortDirection,
+      defaultDirection: 'asc' // starting sort direction when first sorting a column. Defaults to 'asc'
+    },
+    onSort: (_event, index, direction) => {
+      setActiveSortIndex(index);
+      setActiveSortDirection(direction);
+    },
+    columnIndex
+  });
+  //### --- ###
 
   return (
     <React.Fragment>
@@ -130,27 +199,31 @@ const ClusterTable: React.FunctionComponent<{ searchValue: string, statusFilter:
           <Spinner size="xl" />
         </div>
       ) : (
-        <Table aria-label="Simple table">
+        <Table aria-label="Sortable table">
           <Thead>
             <Tr>
-              <Th>{columnNames.name}</Th>
+              <Th sort={getSortParams(0)}>{columnNames.id}</Th>
+              <Th sort={getSortParams(1)}>{columnNames.name}</Th>
               <Th>{columnNames.status}</Th>
-              <Th>{columnNames.account}</Th>
-              <Th>{columnNames.cloudProvider}</Th>
-              <Th>{columnNames.region}</Th>
-              <Th>{columnNames.nodes}</Th>
+              <Th sort={getSortParams(3)}>{columnNames.account}</Th>
+              <Th sort={getSortParams(4)}>{columnNames.cloudProvider}</Th>
+              <Th sort={getSortParams(5)}>{columnNames.region}</Th>
+              <Th sort={getSortParams(6)}>{columnNames.nodes}</Th>
               <Th>{columnNames.console}</Th>
             </Tr>
           </Thead>
           <Tbody>
-            {filteredData.map((cluster) => (
+            {sortedData.map((cluster) => (
               <Tr key={cluster.name}>
-                <Td dataLabel={columnNames.name}>
+                <Td dataLabel={columnNames.id}>
                   <Link
                     to={`/clusters/${cluster.id}`}
                   >
                     {cluster.id}
                   </Link>
+                </Td>
+                <Td dataLabel={columnNames.name}>
+                  {cluster.name}
                 </Td>
                 <Td dataLabel={columnNames.status}>
                   {renderLabel(cluster.status)}

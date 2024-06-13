@@ -4,12 +4,14 @@ export type ClusterData = {
 };
 
 export type Cluster = {
+  id: string;
   name: string;
   provider: string;
   status: string;
   region: string;
   consoleLink: string;
   accountName: string;
+  instanceCount: number;
   instances: Instance[];
 };
 
