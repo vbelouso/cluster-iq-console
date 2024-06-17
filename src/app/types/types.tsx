@@ -12,6 +12,7 @@ export type Cluster = {
   consoleLink: string;
   accountName: string;
   instanceCount: number;
+  lastScanTimestamp: string;
   instances: Instance[];
 };
 

@@ -207,6 +207,17 @@ const ClusterDetails: React.FunctionComponent = () => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const filterTagsByKey = (key) => {
+    const result = tags.tags.filter(tags => tags.key == key)
+    if(result[0] !== undefined && result[0] != null){
+      return result[0].value
+    }
+    return "unknown"
+  }
+
+  const ownerTag = filterTagsByKey("Owner");
+  const partnerTag = filterTagsByKey("Partner");
+
   const handleTabClick = (event, tabIndex) => {
     setActiveTabKey(tabIndex);
   };
@@ -274,7 +285,7 @@ const ClusterDetails: React.FunctionComponent = () => {
           <DescriptionListGroup>
             <DescriptionListTerm>Last scanned at</DescriptionListTerm>
             <DescriptionListDescription>
-              <time>Oct 15, 1:51 pm</time>
+              {cluster.clusters[0].lastScanTimestamp || "unknown"}
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
@@ -287,6 +298,18 @@ const ClusterDetails: React.FunctionComponent = () => {
             <DescriptionListTerm>Created at</DescriptionListTerm>
             <DescriptionListDescription>
               <time>Oct 15, 1:51 pm</time>
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+          <DescriptionListGroup>
+            <DescriptionListTerm>Owner</DescriptionListTerm>
+            <DescriptionListDescription>
+              {ownerTag}
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+          <DescriptionListGroup>
+            <DescriptionListTerm>Partner</DescriptionListTerm>
+            <DescriptionListDescription>
+              {partnerTag}
             </DescriptionListDescription>
           </DescriptionListGroup>
         </DescriptionList>

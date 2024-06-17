@@ -48,7 +48,7 @@ push:
 	@$(CONTAINER_ENGINE) push $(CONSOLE_IMAGE):${IMAGE_TAG}
 
 
-start-dev: export REACT_APP_CIQ_API_URL = http://localhost:8081/api/v1
+start-dev: export REACT_APP_CIQ_API_URL = http://localhost:8081
 start-dev:
 	@echo "### [Starting project DEV MODE] ###"
 	@echo "### [API-URL: $$REACT_APP_CIQ_API_URL] ###"
