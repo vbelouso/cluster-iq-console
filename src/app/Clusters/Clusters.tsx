@@ -1,8 +1,6 @@
 import {
-
   PageSection,
   PageSectionVariants,
-  Pagination,
   Panel,
   ToolbarItem,
   Toolbar,
@@ -10,38 +8,13 @@ import {
   TextContent,
   Text,
   SearchInput,
-  MenuToggle,
-  MenuToggleElement,
-  Label,
-  Select,
-  SelectList,
-  SelectGroup,
-  SelectOption,
-  OverflowMenu,
-  OverflowMenuGroup,
-  OverflowMenuContent,
-  OverflowMenuControl,
-  OverflowMenuItem,
-  OverflowMenuDropdownItem,
-  Button,
-  Dropdown,
-  ToolbarGroup,
-  DropdownList,
   Spinner,
 } from "@patternfly/react-core";
+import { renderStatusLabel } from "src/app/utils/renderStatusLabel";
 import { Table, Thead, Tr, Th, Tbody, Td, ThProps } from "@patternfly/react-table";
 import React, { useEffect, useState } from "react";
 import { Link, useLocation  } from "react-router-dom";
 import { getClusters } from "../services/api";
-import CloneIcon from '@patternfly/react-icons/dist/esm/icons/clone-icon';
-import EditIcon from '@patternfly/react-icons/dist/esm/icons/edit-icon';
-import SyncIcon from '@patternfly/react-icons/dist/esm/icons/sync-icon';
-import CodeIcon from '@patternfly/react-icons/dist/esm/icons/code-icon';
-import CodeBranchIcon from '@patternfly/react-icons/dist/esm/icons/code-branch-icon';
-import SortAmountDownIcon from '@patternfly/react-icons/dist/esm/icons/sort-amount-down-icon';
-import CubeIcon from '@patternfly/react-icons/dist/esm/icons/cube-icon';
-import DashboardWrapper from '@patternfly/react-core/src/demos/examples/DashboardWrapper';
-import EllipsisVIcon from '@patternfly/react-icons/dist/esm/icons/ellipsis-v-icon';
 import { Cluster } from "@app/types/types";
 
 
@@ -114,17 +87,6 @@ const ClusterTable: React.FunctionComponent<{ searchValue: string, statusFilter:
 
     setFilteredData(filtered);
       }, [searchValue, clusterData, statusFilter, cloudProviderFilter]);
-
-  const renderLabel = (labelText: string | null | undefined) => {
-    switch (labelText) {
-      case "Running":
-        return <Label color="green">{labelText}</Label>;
-      case "Stopped":
-        return <Label color="red">{labelText}</Label>;
-      default:
-        return <Label color="gold">{labelText}</Label>;
-    }
-  };
 
   const columnNames = {
     id: "ID",
@@ -226,7 +188,7 @@ const ClusterTable: React.FunctionComponent<{ searchValue: string, statusFilter:
                   {cluster.name}
                 </Td>
                 <Td dataLabel={columnNames.status}>
-                  {renderLabel(cluster.status)}
+                  {renderStatusLabel(cluster.status)}
                 </Td>
                 <Td dataLabel={columnNames.account}>{cluster.accountName}</Td>
                 <Td dataLabel={columnNames.cloudProvider}>
