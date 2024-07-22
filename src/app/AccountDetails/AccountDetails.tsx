@@ -1,3 +1,7 @@
+import {
+  parseScanTimestamp,
+parseNumberToCurrency,
+} from 'src/app/utils/parseFuncs';
 import React, { useEffect, useState } from "react";
 import { useParams } from 'react-router-dom';
 import {
@@ -192,6 +196,10 @@ const AccountDetails: React.FunctionComponent = () => {
             <DescriptionListDescription>
               {accountData.accounts[0].provider}
             </DescriptionListDescription>
+            <DescriptionListTerm>Account Cost (Estimated)</DescriptionListTerm>
+            <DescriptionListDescription>
+              {parseNumberToCurrency(accountData.accounts[0].totalCost)}
+            </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
             <DescriptionListTerm>Labels</DescriptionListTerm>
@@ -199,14 +207,10 @@ const AccountDetails: React.FunctionComponent = () => {
           <DescriptionListGroup>
             <DescriptionListTerm>Last scanned at</DescriptionListTerm>
             <DescriptionListDescription>
-              <time>Oct 15, 1:51 pm</time>
+              {parseScanTimestamp(accountData.accounts[0].lastScanTimestamp)}
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
-            <DescriptionListTerm>Created at</DescriptionListTerm>
-            <DescriptionListDescription>
-              <time>Oct 15, 1:51 pm</time>
-            </DescriptionListDescription>
           </DescriptionListGroup>
         </DescriptionList>
       </FlexItem>

@@ -13,6 +13,7 @@ export type Cluster = {
   accountName: string;
   instanceCount: number;
   lastScanTimestamp: string;
+  totalCost: number;
   instances: Instance[];
 };
 
@@ -26,6 +27,8 @@ export type Account = {
   name: string;
   provider: string;
   clusterCount: number;
+  lastScanTimestamp: string;
+  totalCost: number;
   clusters: Record<string, Cluster>;
 };
 
