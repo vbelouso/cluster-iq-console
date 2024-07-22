@@ -1,7 +1,4 @@
-import {
-  parseScanTimestamp,
-parseNumberToCurrency,
-} from 'src/app/utils/parseFuncs';
+import { parseScanTimestamp, parseNumberToCurrency, } from 'src/app/utils/parseFuncs';
 import { renderStatusLabel } from "src/app/utils/renderStatusLabel";
 import React, { useEffect, useState } from "react";
 import { useParams } from 'react-router-dom';
@@ -189,7 +186,7 @@ const AccountDetails: React.FunctionComponent = () => {
             <DescriptionListDescription>
               {accountData.accounts[0].provider}
             </DescriptionListDescription>
-            <DescriptionListTerm>Account Cost (Estimated)</DescriptionListTerm>
+            <DescriptionListTerm>Account Total Cost (Estimated)</DescriptionListTerm>
             <DescriptionListDescription>
               {parseNumberToCurrency(accountData.accounts[0].totalCost)}
             </DescriptionListDescription>
