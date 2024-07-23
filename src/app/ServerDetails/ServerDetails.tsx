@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { renderStatusLabel } from "src/app/utils/renderStatusLabel";
+import { parseScanTimestamp, parseNumberToCurrency, } from 'src/app/utils/parseFuncs';
 import { useParams } from 'react-router-dom';
 import {
   PageSection,
@@ -24,7 +26,7 @@ import InfoCircleIcon from "@patternfly/react-icons/dist/js/icons/info-circle-ic
 import { Table, Tbody, Td, Th, Thead, Tr } from "@patternfly/react-table";
 import { getInstances, getInstanceByID } from "../services/api";
 import { Link  } from "react-router-dom";
-import { Instance, Instances, Tag } from "@app/types/types";
+import { Instances, Tag } from "@app/types/types";
 import { useLocation  } from "react-router-dom";
 interface LabelGroupOverflowProps {
   labels: Array<Tag>;
@@ -110,6 +112,10 @@ const ServerDetails: React.FunctionComponent = () => {
             <DescriptionListDescription>
               {instanceID}
             </DescriptionListDescription>
+            <DescriptionListTerm>Status</DescriptionListTerm>
+            <DescriptionListDescription>
+              {renderStatusLabel(instanceData.instances[0].status)}
+            </DescriptionListDescription>
             <DescriptionListTerm>Cluster ID</DescriptionListTerm>
             <DescriptionListDescription>
               <Link
@@ -118,32 +124,40 @@ const ServerDetails: React.FunctionComponent = () => {
                 {instanceData.instances[0].clusterID}
               </Link>
             </DescriptionListDescription>
-          </DescriptionListGroup>
-          <DescriptionListGroup>
             <DescriptionListTerm>Cloud Provider</DescriptionListTerm>
             <DescriptionListDescription>
               {instanceData.instances[0].provider}
             </DescriptionListDescription>
           </DescriptionListGroup>
+
           <DescriptionListGroup>
             <DescriptionListTerm>Labels</DescriptionListTerm>
               <LabelGroupOverflow labels={instanceData.instances[0].tags} />
-          </DescriptionListGroup>
-          <DescriptionListGroup>
             <DescriptionListTerm>Last scanned at</DescriptionListTerm>
             <DescriptionListDescription>
-              {instanceData.instances[0].tags.filter(label => label.key == "LaunchTime").map(label => (
-                <Label key={label.key}>{label.value}</Label>
-              ))}
+              {parseScanTimestamp(instanceData.instances[0].creationTimestamp)}
             </DescriptionListDescription>
-          </DescriptionListGroup>
-          <DescriptionListGroup>
             <DescriptionListTerm>Created at</DescriptionListTerm>
             <DescriptionListDescription>
-              {instanceData.instances[0].tags.filter(label => label.key == "LaunchTime").map(label => (
-                <Label key={label.key}>{label.value}</Label>
-              ))}
+              {parseScanTimestamp(instanceData.instances[0].creationTimestamp)}
             </DescriptionListDescription>
+          </DescriptionListGroup>
+
+          <DescriptionListGroup>
+          </DescriptionListGroup>
+
+          <DescriptionListGroup>
+            <DescriptionListTerm>Daily Cost (aprox)</DescriptionListTerm>
+            <DescriptionListDescription>
+              {parseNumberToCurrency(instanceData.instances[0].dailyCost)}
+            </DescriptionListDescription>
+            <DescriptionListTerm>Total Cost (aprox)</DescriptionListTerm>
+            <DescriptionListDescription>
+              {parseNumberToCurrency(instanceData.instances[0].totalCost)}
+            </DescriptionListDescription>
+          </DescriptionListGroup>
+
+          <DescriptionListGroup>
           </DescriptionListGroup>
         </DescriptionList>
       </FlexItem>

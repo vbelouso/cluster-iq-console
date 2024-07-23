@@ -53,9 +53,13 @@ export type Instance = {
     name: string;
     availabilityZone: string;
     instanceType: string;
-    state: string;
+    status: string;
     clusterID: string;
     provider: string;
+    lastScanTimestamp: string;
+    creationTimestamp: string;
+    dailyCost: number;
+    totalCost: number;
     tags: Array<Tag>;
 }
 
