@@ -74,8 +74,8 @@ const AggregateInstancesPerCluster: React.FunctionComponent = () => {
   const [activeSortDirection, setActiveSortDirection] = React.useState<'asc' | 'desc' | undefined>('asc');
   // sort dropdown expansion
   const getSortableRowValues = (instance: Instance): (string | number | null)[] => {
-    const { id, name, availabilityZone, instanceType, state, clusterID, provider } = instance;
-    return [id, name, availabilityZone, instanceType, state, clusterID, provider];
+    const { id, name, availabilityZone, instanceType, status, clusterID, provider } = instance;
+    return [id, name, availabilityZone, instanceType, status, clusterID, provider];
   };
 
   // Sorting
