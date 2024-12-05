@@ -7,9 +7,10 @@ FROM registry.access.redhat.com/ubi9/nodejs-18:1-59.1690899127
 LABEL VERSION="v0.2"
 LABEL description="ClusterIQ Web Console"
 
-COPY . .
-RUN npm install &&\
-  npm run build --legacy-peer-deps
+COPY --chown=default:root . .
+
+RUN npm install 
+RUN npm run build --legacy-peer-deps
 
 EXPOSE 3000
 
