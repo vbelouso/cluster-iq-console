@@ -1,3 +1,5 @@
+import { parseScanTimestamp, parseNumberToCurrency, } from 'src/app/utils/parseFuncs';
+import { renderStatusLabel } from "src/app/utils/renderStatusLabel";
 import React, { useEffect, useState } from "react";
 import { useParams } from 'react-router-dom';
 import {
@@ -18,9 +20,7 @@ import {
   FlexItem,
   Page,
   Spinner,
-  LabelGroup,
 } from "@patternfly/react-core";
-import InfoCircleIcon from "@patternfly/react-icons/dist/js/icons/info-circle-icon";
 import { Table, Tbody, Td, Th, Thead, Tr } from "@patternfly/react-table";
 import { getAccountByName, getAccountClusters } from "../services/api";
 import { Link  } from "react-router-dom";
@@ -32,15 +32,6 @@ interface LabelGroupOverflowProps {
   }[];
 }
 
-const LabelGroupOverflow: React.FunctionComponent<LabelGroupOverflowProps> = ({
-  labels,
-}) => (
-  <LabelGroup>
-    {labels.map((label, index) => (
-      <Label key={index}>{label.text}</Label>
-    ))}
-  </LabelGroup>
-);
 
 const AggregateClustersPerAccount: React.FunctionComponent = () => {
   const [data, setData] = useState<Cluster[] | []>([]);
@@ -87,6 +78,7 @@ const AggregateClustersPerAccount: React.FunctionComponent = () => {
             <Tr>
               <Th>ID</Th>
               <Th>Name</Th>
+              <Th>Status</Th>
               <Th>Provider</Th>
               <Th>Instance Count</Th>
             </Tr>
@@ -102,6 +94,9 @@ const AggregateClustersPerAccount: React.FunctionComponent = () => {
                   </Link>
                 </Td>
                 <Td>{cluster.name}</Td>
+                <Td dataLabel={cluster.status}>
+                  {renderStatusLabel(cluster.status)}
+                </Td>
                 <Td>{cluster.provider}</Td>
                 <Td>{cluster.instanceCount}</Td>
               </Tr>
@@ -122,7 +117,6 @@ const AccountDetails: React.FunctionComponent = () => {
   });
   const [loading, setLoading] = useState(true);
   const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -192,21 +186,20 @@ const AccountDetails: React.FunctionComponent = () => {
             <DescriptionListDescription>
               {accountData.accounts[0].provider}
             </DescriptionListDescription>
+            <DescriptionListTerm>Account Total Cost (Estimated)</DescriptionListTerm>
+            <DescriptionListDescription>
+              {parseNumberToCurrency(accountData.accounts[0].totalCost)}
+            </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
-            <DescriptionListTerm>Labels</DescriptionListTerm>
           </DescriptionListGroup>
           <DescriptionListGroup>
             <DescriptionListTerm>Last scanned at</DescriptionListTerm>
             <DescriptionListDescription>
-              <time>Oct 15, 1:51 pm</time>
+              {parseScanTimestamp(accountData.accounts[0].lastScanTimestamp)}
             </DescriptionListDescription>
           </DescriptionListGroup>
           <DescriptionListGroup>
-            <DescriptionListTerm>Created at</DescriptionListTerm>
-            <DescriptionListDescription>
-              <time>Oct 15, 1:51 pm</time>
-            </DescriptionListDescription>
           </DescriptionListGroup>
         </DescriptionList>
       </FlexItem>

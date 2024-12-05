@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from 'react-router-dom';
+import { renderStatusLabel } from "src/app/utils/renderStatusLabel";
+import { parseScanTimestamp, parseNumberToCurrency, } from 'src/app/utils/parseFuncs';
 import {
   PageSection,
   PageSectionVariants,
@@ -20,7 +22,6 @@ import {
   Spinner,
   LabelGroup,
 } from "@patternfly/react-core";
-import InfoCircleIcon from "@patternfly/react-icons/dist/js/icons/info-circle-icon";
 import { Table, Tbody, Td, Th, Thead, Tr, ThProps } from "@patternfly/react-table";
 import { getCluster, getClusterInstances, getClusterTags } from "../services/api";
 import { ClusterData, Instance, Tag, TagData } from "@app/types/types";
@@ -28,17 +29,6 @@ import { Link, useLocation  } from "react-router-dom";
 interface LabelGroupOverflowProps {
   labels: Array<Tag>;
 }
-
-const renderLabel = (labelText: string | null | undefined) => {
-  switch (labelText) {
-    case "Running":
-      return <Label color="green">{labelText}</Label>;
-    case "Stopped":
-      return <Label color="red">{labelText}</Label>;
-    default:
-      return <Label color="gold">{labelText}</Label>;
-  }
-};
 
 const LabelGroupOverflow: React.FunctionComponent<LabelGroupOverflowProps> = ({
   labels,
@@ -84,8 +74,8 @@ const AggregateInstancesPerCluster: React.FunctionComponent = () => {
   const [activeSortDirection, setActiveSortDirection] = React.useState<'asc' | 'desc' | undefined>('asc');
   // sort dropdown expansion
   const getSortableRowValues = (instance: Instance): (string | number | null)[] => {
-    const { id, name, availabilityZone, instanceType, state, clusterID, provider } = instance;
-    return [id, name, availabilityZone, instanceType, state, clusterID, provider];
+    const { id, name, availabilityZone, instanceType, status, clusterID, provider } = instance;
+    return [id, name, availabilityZone, instanceType, status, clusterID, provider];
   };
 
   // Sorting
@@ -145,8 +135,8 @@ const AggregateInstancesPerCluster: React.FunctionComponent = () => {
               <Th sort={getSortParams(0)}>ID</Th>
               <Th sort={getSortParams(1)}>Name</Th>
               <Th sort={getSortParams(3)}>Type</Th>
+              <Th sort={getSortParams(4)}>Status</Th>
               <Th sort={getSortParams(2)}>AvailabilityZone</Th>
-              <Th sort={getSortParams(4)}>State</Th>
             </Tr>
           </Thead>
           <Tbody>
@@ -161,10 +151,10 @@ const AggregateInstancesPerCluster: React.FunctionComponent = () => {
                 </Td>
                 <Td>{instance.name}</Td>
                 <Td>{instance.instanceType}</Td>
-                <Td>{instance.availabilityZone}</Td>
-                <Td dataLabel={instance.state}>
-                  {renderLabel(instance.state)}
+                <Td dataLabel={instance.status}>
+                  {renderStatusLabel(instance.status)}
                 </Td>
+                <Td>{instance.availabilityZone}</Td>
               </Tr>
             ))}
           </Tbody>
@@ -188,7 +178,6 @@ const ClusterDetails: React.FunctionComponent = () => {
   const [loading, setLoading] = useState(true);
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  const clusterStatus = queryParams.get('status');
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -259,57 +248,59 @@ const ClusterDetails: React.FunctionComponent = () => {
             <DescriptionListDescription>
               {clusterID}
             </DescriptionListDescription>
+            <DescriptionListTerm>Status</DescriptionListTerm>
+            <DescriptionListDescription>
+              {renderStatusLabel(cluster.clusters[0].status)}
+            </DescriptionListDescription>
           </DescriptionListGroup>
+
           <DescriptionListGroup>
             <DescriptionListTerm>Web console</DescriptionListTerm>
             <DescriptionListDescription>
                 <a href={cluster.clusters[0].consoleLink} target="_blank" rel="noopener noreferrer">Console</a>
             </DescriptionListDescription>
+            <DescriptionListTerm>Cluster Total Cost (Estimated)</DescriptionListTerm>
+            <DescriptionListDescription>
+              {parseNumberToCurrency(cluster.clusters[0].totalCost)}
+            </DescriptionListDescription>
           </DescriptionListGroup>
-          <DescriptionListGroup>
+
+          <DescriptionListGroup name="Cloud Properties">
             <DescriptionListTerm>Cloud Provider</DescriptionListTerm>
             <DescriptionListDescription>
               {cluster.clusters[0].provider}
             </DescriptionListDescription>
-          </DescriptionListGroup>
-          <DescriptionListGroup>
-            <DescriptionListTerm>Labels</DescriptionListTerm>
-              <LabelGroupOverflow labels={tags.tags} />
-          </DescriptionListGroup>
-          <DescriptionListGroup>
             <DescriptionListTerm>Account</DescriptionListTerm>
             <DescriptionListDescription>
               {cluster.clusters[0].accountName || "unknown"}
             </DescriptionListDescription>
-          </DescriptionListGroup>
-          <DescriptionListGroup>
-            <DescriptionListTerm>Last scanned at</DescriptionListTerm>
-            <DescriptionListDescription>
-              {cluster.clusters[0].lastScanTimestamp || "unknown"}
-            </DescriptionListDescription>
-          </DescriptionListGroup>
-          <DescriptionListGroup>
             <DescriptionListTerm>Region</DescriptionListTerm>
             <DescriptionListDescription>
               {cluster.clusters[0].region || "unknown"}
             </DescriptionListDescription>
           </DescriptionListGroup>
-          <DescriptionListGroup>
+
+          <DescriptionListGroup name="Timestamps">
             <DescriptionListTerm>Created at</DescriptionListTerm>
             <DescriptionListDescription>
-              <time>Oct 15, 1:51 pm</time>
+              {parseScanTimestamp(cluster.clusters[0].creationTimestamp)}
             </DescriptionListDescription>
-          </DescriptionListGroup>
-          <DescriptionListGroup>
-            <DescriptionListTerm>Owner</DescriptionListTerm>
+            <DescriptionListTerm>Last scanned at</DescriptionListTerm>
             <DescriptionListDescription>
-              {ownerTag}
+              {parseScanTimestamp(cluster.clusters[0].lastScanTimestamp)}
             </DescriptionListDescription>
           </DescriptionListGroup>
-          <DescriptionListGroup>
+
+          <DescriptionListGroup name="Extra metadata">
+            <DescriptionListTerm>Labels</DescriptionListTerm>
+              <LabelGroupOverflow labels={tags.tags} />
             <DescriptionListTerm>Partner</DescriptionListTerm>
             <DescriptionListDescription>
               {partnerTag}
+            </DescriptionListDescription>
+            <DescriptionListTerm>Owner</DescriptionListTerm>
+            <DescriptionListDescription>
+              {ownerTag}
             </DescriptionListDescription>
           </DescriptionListGroup>
         </DescriptionList>
