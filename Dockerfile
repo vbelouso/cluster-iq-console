@@ -8,7 +8,7 @@ LABEL VERSION="v0.2"
 LABEL description="ClusterIQ Web Console"
 
 COPY . .
-RUN npm install --save-prod &&\
+RUN npm install &&\
   npm run build --legacy-peer-deps
 
 EXPOSE 3000
