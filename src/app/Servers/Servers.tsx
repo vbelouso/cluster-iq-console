@@ -1,3 +1,4 @@
+import { renderStatusLabel } from "src/app/utils/renderStatusLabel";
 import {
   PageSection,
   PageSectionVariants,
@@ -494,7 +495,7 @@ const ServersTable: React.FunctionComponent<ServersTableProps> = ({
 
     if (statusSelection) {
       filtered = filtered.filter((instance) =>
-        instance.state.includes(statusSelection)
+        instance.status.includes(statusSelection)
       );
       // console.log("Filtered by status:", filtered);
     }
@@ -526,21 +527,10 @@ const ServersTable: React.FunctionComponent<ServersTableProps> = ({
   const columnNames = {
     id: "ID",
     name: "Name",
-    state: "Status",
+    status: "Status",
     provider: "Provider",
     availabilityZone: "AZ",
     instanceType: "Type",
-  };
-
-  const renderLabel = (labelText: string | null | undefined) => {
-    switch (labelText) {
-      case "Running":
-        return <Label color="green">{labelText}</Label>;
-      case "Stopped":
-        return <Label color="red">{labelText}</Label>;
-      default:
-        return <Label color="gold">{labelText}</Label>;
-    }
   };
 
   return (
@@ -562,7 +552,7 @@ const ServersTable: React.FunctionComponent<ServersTableProps> = ({
             <Tr>
               <Th>{columnNames.id}</Th>
               <Th>{columnNames.name}</Th>
-              <Th>{columnNames.state}</Th>
+              <Th>{columnNames.status}</Th>
               <Th>{columnNames.provider}</Th>
               <Th>{columnNames.availabilityZone}</Th>
               <Th>{columnNames.instanceType}</Th>
@@ -581,8 +571,8 @@ const ServersTable: React.FunctionComponent<ServersTableProps> = ({
                 <Td dataLabel={columnNames.name} width={30}>
                   {instance.name}
                 </Td>
-                <Td dataLabel={columnNames.state}>
-                  {renderLabel(instance.state)}
+                <Td dataLabel={columnNames.status}>
+                  {renderStatusLabel(instance.status)}
                 </Td>
                 <Td dataLabel={columnNames.provider}>{instance.provider}</Td>
                 <Td dataLabel={columnNames.availabilityZone}>{instance.availabilityZone}</Td>
@@ -599,10 +589,6 @@ const ServersTable: React.FunctionComponent<ServersTableProps> = ({
 };
 
 const Servers: React.FunctionComponent = () => {
-  const provider = useLocation();
-  const queryParams = new URLSearchParams(provider.search);
-  const statusFilter = queryParams.get("status");
-  const cloudProviderFilter = queryParams.get("provider");
   const [searchValue, setSearchValue] = useState<string>("");
   const [statusSelection, setStatusSelection] = useState("");
   const [providerSelections, setProviderSelections] = useState<string[]>([]);

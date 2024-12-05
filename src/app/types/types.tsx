@@ -12,7 +12,9 @@ export type Cluster = {
   consoleLink: string;
   accountName: string;
   instanceCount: number;
+  creationTimestamp: string;
   lastScanTimestamp: string;
+  totalCost: number;
   instances: Instance[];
 };
 
@@ -26,6 +28,8 @@ export type Account = {
   name: string;
   provider: string;
   clusterCount: number;
+  lastScanTimestamp: string;
+  totalCost: number;
   clusters: Record<string, Cluster>;
 };
 
@@ -49,9 +53,13 @@ export type Instance = {
     name: string;
     availabilityZone: string;
     instanceType: string;
-    state: string;
+    status: string;
     clusterID: string;
     provider: string;
+    lastScanTimestamp: string;
+    creationTimestamp: string;
+    dailyCost: number;
+    totalCost: number;
     tags: Array<Tag>;
 }
 
