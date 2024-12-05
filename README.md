@@ -1,9 +1,13 @@
-# ClusterIQ
+# ClusterIQ Console
+This repo contains the ClusterIQ Console as the Web User Interface for the
+[ClusterIQ](https://github.com/RHEcosystemAppEng/cluster-iq) project.
 
-ClusterIQ is an open source tool for `PLACEHOLDER`.
 
-## Quick-start
+## Deployment
+This section explains how to deploy ClusterIQ Console.
 
+### Quick-start (local)
+Follow this steps for deploying a local instance of the console.
 ```bash
 git clone https://github.com/r2dedios/ocp_inventory_ui
 cd ocp_inventory_ui
