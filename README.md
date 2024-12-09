@@ -9,8 +9,8 @@ This section explains how to deploy ClusterIQ Console.
 ### Quick-start (local)
 Follow this steps for deploying a local instance of the console.
 ```bash
-git clone https://github.com/r2dedios/ocp_inventory_ui
-cd ocp_inventory_ui
+git clone git@github.com:RHEcosystemAppEng/cluster-iq-console.git
+cd cluster-iq-console
 npm install && npm run start:dev
 ```
 
