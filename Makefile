@@ -32,7 +32,7 @@ compile:
 
 build:
 	@echo "### [Building project's docker image] ###"
-	@$(CONTAINER_ENGINE) build -t $(CONSOLE_IMAGE):latest -f ./Dockerfile .
+	@$(CONTAINER_ENGINE) build -t $(CONSOLE_IMAGE):latest -f ./Containerfile .
 	@$(CONTAINER_ENGINE) tag $(CONSOLE_IMAGE):latest $(CONSOLE_IMAGE):${VERSION}
 	@$(CONTAINER_ENGINE) tag $(CONSOLE_IMAGE):latest $(CONSOLE_IMAGE):${IMAGE_TAG}
 	@echo "Build Successful"
