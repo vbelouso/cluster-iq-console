@@ -1,6 +1,6 @@
 VERSION := $(shell cat VERSION)
 IMAGE_TAG := $(shell git rev-parse --short=7 HEAD)
-CONTAINER_ENGINE ?= $(shell which pod >/dev/null 2>&1 && echo pod || echo docker)
+CONTAINER_ENGINE ?= $(shell which podman >/dev/null 2>&1 && echo podman || echo docker)
 K8S_CLI ?= $(shell which oc >/dev/null 2>&1 && echo oc || echo kubectl)
 REGISTRY ?= quay.io
 PROJECT_NAME ?= cluster-iq
