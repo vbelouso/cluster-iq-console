@@ -1,14 +1,14 @@
-import * as React from "react";
-import "@patternfly/react-core/dist/styles/base.css";
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import { AppLayout } from "./AppLayout/AppLayout";
-import Overview from "./Overview/Overview";
-import Clusters from "./Clusters/Clusters";
-import ClusterDetails from "./ClusterDetails/ClusterDetails";
-import AccountDetails from "./AccountDetails/AccountDetails";
-import ServerDetails from "./ServerDetails/ServerDetails";
-import Servers from "./Servers/Servers"
-import Accounts from "./Accounts/Accounts"
+import * as React from 'react';
+import '@patternfly/react-core/dist/styles/base.css';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import { AppLayout } from './AppLayout/AppLayout';
+import Overview from './Overview/Overview';
+import Clusters from './Clusters/Clusters';
+import ClusterDetails from './ClusterDetails/ClusterDetails';
+import AccountDetails from './AccountDetails/AccountDetails';
+import ServerDetails from './ServerDetails/ServerDetails';
+import Servers from './Servers/Servers';
+import Accounts from './Accounts/Accounts';
 
 const AppRoutes = (): React.ReactElement => (
   <Routes>

@@ -1,18 +1,28 @@
-## Run
-####################
-# Obtained from: https://catalog.redhat.com/software/containers/ubi9/nodejs-18/62e8e7ed22d1d3c2dfe2ca01?container-tabs=gti
-FROM registry.access.redhat.com/ubi9/nodejs-18:9.5-1733148761
+ARG NODE_VERSION=18
+ARG NODE_IMAGE_TAG=9.5-1733148761
 
-# Labels
-LABEL VERSION="v0.2"
-LABEL description="ClusterIQ Web Console"
+ARG NGINX_VERSION=124
+ARG NGINX_IMAGE_TAG=9.5-1734313329
+ARG NGINX_PORT=8080
 
-COPY --chown=default:root . .
+# Reference https://catalog.redhat.com/software/containers/ubi9/nodejs-18/62e8e7ed22d1d3c2dfe2ca01
+FROM registry.access.redhat.com/ubi9/nodejs-${NODE_VERSION}:${NODE_IMAGE_TAG} AS builder
 
-RUN npm install 
-RUN npm run build --legacy-peer-deps
+COPY package.json package-lock.json ./
+RUN npm ci
 
-EXPOSE 3000
+COPY index.html .
+COPY vite.config.js .
+COPY src/ ./src/
 
-ENTRYPOINT ["npm", "run"]
-CMD ["start"]
+RUN npm run build
+
+# Reference: https://catalog.redhat.com/software/containers/ubi9/nginx-124/657b066b6c1bc124a1d7ff39
+FROM registry.access.redhat.com/ubi9/nginx-${NGINX_VERSION}:${NGINX_IMAGE_TAG}
+
+COPY --chown=1001:0 --from=builder ${HOME}/dist/ ./
+COPY --chown=1001:0 nginx/nginx.conf.template /etc/nginx/nginx.conf.template
+COPY --chown=1001:0 nginx/script.sh ${HOME}/nginx-start/script.sh
+EXPOSE ${NGINX_PORT}
+
+CMD /usr/libexec/s2i/run

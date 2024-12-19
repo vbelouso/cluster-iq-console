@@ -9,17 +9,16 @@ import {
   Text,
   SearchInput,
   Spinner,
-} from "@patternfly/react-core";
-import { renderStatusLabel } from "src/app/utils/renderStatusLabel";
-import { Table, Thead, Tr, Th, Tbody, Td, ThProps } from "@patternfly/react-table";
-import React, { useEffect, useState } from "react";
-import { Link, useLocation  } from "react-router-dom";
-import { getClusters } from "../services/api";
-import { Cluster } from "@app/types/types";
+} from '@patternfly/react-core';
+import { renderStatusLabel } from 'src/app/utils/renderStatusLabel';
+import { Table, Thead, Tr, Th, Tbody, Td, ThProps } from '@patternfly/react-table';
+import React, { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { getClusters } from '../services/api';
+import { Cluster } from '@app/types/types';
 
-
-const TableToolbar: React.FunctionComponent<{onSearchChange: (value: string) => void;}> = ({ onSearchChange }) => {
-  const [value, setValue] = React.useState("");
+const TableToolbar: React.FunctionComponent<{ onSearchChange: (value: string) => void }> = ({ onSearchChange }) => {
+  const [value, setValue] = React.useState('');
 
   const onChange = (value: string) => {
     setValue(value);
@@ -35,7 +34,7 @@ const TableToolbar: React.FunctionComponent<{onSearchChange: (value: string) => 
             placeholder="Search by name..."
             value={value}
             onChange={(_event, value) => onChange(value)}
-            onClear={() => onChange("")}
+            onClear={() => onChange('')}
           />
         </ToolbarItem>
       </ToolbarContent>
@@ -43,16 +42,14 @@ const TableToolbar: React.FunctionComponent<{onSearchChange: (value: string) => 
   );
 };
 
-const ClusterTable: React.FunctionComponent<{ searchValue: string, statusFilter: string | null, cloudProviderFilter: string | null }> = ({
-  searchValue,
-  statusFilter,
-  cloudProviderFilter,
-}) => {
-
+const ClusterTable: React.FunctionComponent<{
+  searchValue: string;
+  statusFilter: string | null;
+  cloudProviderFilter: string | null;
+}> = ({ searchValue, statusFilter, cloudProviderFilter }) => {
   const [clusterData, setClusterData] = useState<Cluster[] | []>([]);
   const [filteredData, setFilteredData] = useState<Cluster[] | []>([]);
   const [loading, setLoading] = useState(true);
-
 
   useEffect(() => {
     const fetchData = async () => {
@@ -61,7 +58,7 @@ const ClusterTable: React.FunctionComponent<{ searchValue: string, statusFilter:
         const fetchedClusters = await getClusters();
         setClusterData(fetchedClusters.clusters);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
@@ -71,9 +68,7 @@ const ClusterTable: React.FunctionComponent<{ searchValue: string, statusFilter:
   }, []);
 
   useEffect(() => {
-    let filtered = clusterData.filter((cluster) =>
-      cluster.name.toLowerCase().includes(searchValue.toLowerCase())
-    );
+    let filtered = clusterData.filter((cluster) => cluster.name.toLowerCase().includes(searchValue.toLowerCase()));
 
     if (statusFilter) {
       filtered = filtered.filter((cluster) => cluster.status === statusFilter);
@@ -86,17 +81,17 @@ const ClusterTable: React.FunctionComponent<{ searchValue: string, statusFilter:
     }
 
     setFilteredData(filtered);
-      }, [searchValue, clusterData, statusFilter, cloudProviderFilter]);
+  }, [searchValue, clusterData, statusFilter, cloudProviderFilter]);
 
   const columnNames = {
-    id: "ID",
-    name: "Name",
-    status: "Status",
-    account: "Account",
-    cloudProvider: "Cloud Provider",
-    region: "Region",
-    nodes: "Nodes",
-    console: "Web console",
+    id: 'ID',
+    name: 'Name',
+    status: 'Status',
+    account: 'Account',
+    cloudProvider: 'Cloud Provider',
+    region: 'Region',
+    nodes: 'Nodes',
+    console: 'Web console',
   };
 
   //### Sorting ###
@@ -137,13 +132,13 @@ const ClusterTable: React.FunctionComponent<{ searchValue: string, statusFilter:
     sortBy: {
       index: activeSortIndex,
       direction: activeSortDirection,
-      defaultDirection: 'asc' // starting sort direction when first sorting a column. Defaults to 'asc'
+      defaultDirection: 'asc', // starting sort direction when first sorting a column. Defaults to 'asc'
     },
     onSort: (_event, index, direction) => {
       setActiveSortIndex(index);
       setActiveSortDirection(direction);
     },
-    columnIndex
+    columnIndex,
   });
   //### --- ###
 
@@ -152,10 +147,10 @@ const ClusterTable: React.FunctionComponent<{ searchValue: string, statusFilter:
       {loading ? (
         <div
           style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100vh",
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100vh',
           }}
         >
           <Spinner size="xl" />
@@ -178,35 +173,24 @@ const ClusterTable: React.FunctionComponent<{ searchValue: string, statusFilter:
             {sortedData.map((cluster) => (
               <Tr key={cluster.name}>
                 <Td dataLabel={columnNames.id}>
-                  <Link
-                    to={`/clusters/${cluster.id}`}
-                  >
-                    {cluster.id}
-                  </Link>
+                  <Link to={`/clusters/${cluster.id}`}>{cluster.id}</Link>
                 </Td>
-                <Td dataLabel={columnNames.name}>
-                  {cluster.name}
-                </Td>
-                <Td dataLabel={columnNames.status}>
-                  {renderStatusLabel(cluster.status)}
-                </Td>
+                <Td dataLabel={columnNames.name}>{cluster.name}</Td>
+                <Td dataLabel={columnNames.status}>{renderStatusLabel(cluster.status)}</Td>
                 <Td dataLabel={columnNames.account}>{cluster.accountName}</Td>
-                <Td dataLabel={columnNames.cloudProvider}>
-                  {cluster.provider}
-                </Td>
+                <Td dataLabel={columnNames.cloudProvider}>{cluster.provider}</Td>
                 <Td dataLabel={columnNames.region}>{cluster.region}</Td>
-                <Td dataLabel={columnNames.nodes}>
-                  {cluster.instanceCount}
-                </Td>
+                <Td dataLabel={columnNames.nodes}>{cluster.instanceCount}</Td>
                 <Td dataLabel={columnNames.console}>
-                  <a
-                    href={cluster.consoleLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                  <a href={`https://${cluster.consoleLink}`} target="_blank" rel="noopener noreferrer">
                     Console
                   </a>
                 </Td>
+                {/* <Td dataLabel={columnNames.console}>
+                  <a href={cluster.consoleLink} target="_blank" rel="noopener noreferrer">
+                    Console
+                  </a>
+                </Td> */}
               </Tr>
             ))}
           </Tbody>
@@ -217,7 +201,7 @@ const ClusterTable: React.FunctionComponent<{ searchValue: string, statusFilter:
 };
 
 const Clusters: React.FunctionComponent = () => {
-  const [searchValue, setSearchValue] = useState<string>("");
+  const [searchValue, setSearchValue] = useState<string>('');
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const statusFilter = queryParams.get('status');
@@ -232,8 +216,12 @@ const Clusters: React.FunctionComponent = () => {
       </PageSection>
       <PageSection variant={PageSectionVariants.light} isFilled>
         <Panel>
-          <TableToolbar onSearchChange={setSearchValue} />{" "}
-          <ClusterTable searchValue={searchValue} statusFilter={statusFilter} cloudProviderFilter={cloudProviderFilter} />{" "}
+          <TableToolbar onSearchChange={setSearchValue} />{' '}
+          <ClusterTable
+            searchValue={searchValue}
+            statusFilter={statusFilter}
+            cloudProviderFilter={cloudProviderFilter}
+          />{' '}
         </Panel>
       </PageSection>
     </React.Fragment>
