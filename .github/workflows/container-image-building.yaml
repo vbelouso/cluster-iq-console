@@ -3,7 +3,7 @@ name: Cluster IQ Container image building
 on:
   push:
     tags:
-      - v1.**
+      - v[0-9]*.[0-9]*.[0-9]*
 
 jobs:
   setup:
