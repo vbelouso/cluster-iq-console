@@ -2,15 +2,8 @@ name: Cluster IQ Container image building
 
 on:
   push:
-    branches:
-      - main
-      - release-.*
-      - release-.*-rc-.*
-  pull_request:
-    branches:
-      - main
-      - release-.*
-      - release-.*-rc-.*
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+.*'
 
 jobs:
   setup:
