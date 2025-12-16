@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
+import { CardTotalCount } from '@app/Overview/types.ts';
 import { Divider, Flex, FlexItem, Stack } from '@patternfly/react-core';
 
 // TODO Avoid any
