@@ -116,6 +116,7 @@ export interface ClusterRequestApi {
 export interface ClusterResponseApi {
   last15DaysCost?: number;
   accountId?: string;
+  accountName?: string;
   age?: number;
   clusterId?: string;
   clusterName?: string;
