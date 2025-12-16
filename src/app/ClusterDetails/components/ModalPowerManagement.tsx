@@ -12,9 +12,8 @@ import {
   TextInput,
 } from '@patternfly/react-core';
 import React from 'react';
-import { PowerAction } from './ClusterDetailsDropdown';
 import DateTimePicker from './DateTimePicker';
-import { CronAction, ScheduledAction } from './types';
+import { CronAction, ScheduledAction, PowerAction } from './types';
 import { useParams } from 'react-router-dom';
 import { useUser } from '@app/Contexts/UserContext.tsx';
 import { startCluster, stopCluster } from '@api';

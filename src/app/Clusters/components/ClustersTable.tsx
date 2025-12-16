@@ -48,7 +48,7 @@ export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
   }
 
   if (accountNameSearch) {
-    processed = searchItems(processed, accountNameSearch, ['accountId']);
+    processed = searchItems(processed, accountNameSearch, ['accountName']);
   }
 
   processed = filterByStatus(processed, statusFilter);

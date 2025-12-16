@@ -19,6 +19,7 @@ import React from 'react';
 import { AccountsToolbarProps } from '../types';
 import { ProviderApi } from '@api';
 import debounce from 'lodash.debounce';
+import { usePopperContainer } from '@app/hooks/usePopperContainer';
 
 export const AccountsToolbar: React.FunctionComponent<AccountsToolbarProps> = ({
   searchValue,
@@ -46,31 +47,38 @@ export const AccountsToolbar: React.FunctionComponent<AccountsToolbarProps> = ({
   const [isProviderMenuOpen, setIsProviderMenuOpen] = React.useState<boolean>(false);
   const providerToggleRef = React.useRef<HTMLButtonElement>(null);
   const providerMenuRef = React.useRef<HTMLDivElement>(null);
-  const providerContainerRef = React.useRef<HTMLDivElement>(null);
+  const { containerRef: providerContainerRef, containerElement: providerContainerElement } = usePopperContainer();
 
-  const handleProviderMenuKeys = (event: KeyboardEvent) => {
-    if (isProviderMenuOpen && providerMenuRef.current?.contains(event.target as Node)) {
-      if (event.key === 'Escape' || event.key === 'Tab') {
-        setIsProviderMenuOpen(!isProviderMenuOpen);
-        providerToggleRef.current?.focus();
-      }
-    }
-  };
-
-  const handleProviderClickOutside = (event: MouseEvent) => {
-    if (isProviderMenuOpen && !providerMenuRef.current?.contains(event.target as Node)) {
-      setIsProviderMenuOpen(false);
-    }
-  };
+  const handleProviderMenuKeysRef = React.useRef<(event: KeyboardEvent) => void>();
+  const handleProviderClickOutsideRef = React.useRef<(event: MouseEvent) => void>();
 
   React.useEffect(() => {
-    window.addEventListener('keydown', handleProviderMenuKeys);
-    window.addEventListener('click', handleProviderClickOutside);
-    return () => {
-      window.removeEventListener('keydown', handleProviderMenuKeys);
-      window.removeEventListener('click', handleProviderClickOutside);
+    handleProviderMenuKeysRef.current = (event: KeyboardEvent) => {
+      if (isProviderMenuOpen && providerMenuRef.current?.contains(event.target as Node)) {
+        if (event.key === 'Escape' || event.key === 'Tab') {
+          setIsProviderMenuOpen(!isProviderMenuOpen);
+          providerToggleRef.current?.focus();
+        }
+      }
     };
-  }, [isProviderMenuOpen, providerMenuRef]);
+
+    handleProviderClickOutsideRef.current = (event: MouseEvent) => {
+      if (isProviderMenuOpen && !providerMenuRef.current?.contains(event.target as Node)) {
+        setIsProviderMenuOpen(false);
+      }
+    };
+  });
+
+  React.useEffect(() => {
+    const handleKeydown = (event: KeyboardEvent) => handleProviderMenuKeysRef.current?.(event);
+    const handleClick = (event: MouseEvent) => handleProviderClickOutsideRef.current?.(event);
+    window.addEventListener('keydown', handleKeydown);
+    window.addEventListener('click', handleClick);
+    return () => {
+      window.removeEventListener('keydown', handleKeydown);
+      window.removeEventListener('click', handleClick);
+    };
+  }, [isProviderMenuOpen]);
 
   const onProviderMenuToggleClick = (ev: React.MouseEvent) => {
     ev.stopPropagation();
@@ -161,7 +169,7 @@ export const AccountsToolbar: React.FunctionComponent<AccountsToolbarProps> = ({
         triggerRef={providerToggleRef}
         popper={providerMenu}
         popperRef={providerMenuRef}
-        appendTo={providerContainerRef.current || undefined}
+        appendTo={providerContainerElement || undefined}
         isVisible={isProviderMenuOpen}
       />
     </div>
@@ -172,37 +180,44 @@ export const AccountsToolbar: React.FunctionComponent<AccountsToolbarProps> = ({
   const [isAttributeMenuOpen, setIsAttributeMenuOpen] = React.useState(false);
   const attributeToggleRef = React.useRef<HTMLButtonElement>(null);
   const attributeMenuRef = React.useRef<HTMLDivElement>(null);
-  const attributeContainerRef = React.useRef<HTMLDivElement>(null);
+  const { containerRef: attributeContainerRef, containerElement: attributeContainerElement } = usePopperContainer();
 
-  const handleAttribueMenuKeys = (event: KeyboardEvent) => {
-    if (!isAttributeMenuOpen) {
-      return;
-    }
-    if (
-      attributeMenuRef.current?.contains(event.target as Node) ||
-      attributeToggleRef.current?.contains(event.target as Node)
-    ) {
-      if (event.key === 'Escape' || event.key === 'Tab') {
-        setIsAttributeMenuOpen(!isAttributeMenuOpen);
-        attributeToggleRef.current?.focus();
-      }
-    }
-  };
-
-  const handleAttributeClickOutside = (event: MouseEvent) => {
-    if (isAttributeMenuOpen && !attributeMenuRef.current?.contains(event.target as Node)) {
-      setIsAttributeMenuOpen(false);
-    }
-  };
+  const handleAttribueMenuKeysRef = React.useRef<(event: KeyboardEvent) => void>();
+  const handleAttributeClickOutsideRef = React.useRef<(event: MouseEvent) => void>();
 
   React.useEffect(() => {
-    window.addEventListener('keydown', handleAttribueMenuKeys);
-    window.addEventListener('click', handleAttributeClickOutside);
-    return () => {
-      window.removeEventListener('keydown', handleAttribueMenuKeys);
-      window.removeEventListener('click', handleAttributeClickOutside);
+    handleAttribueMenuKeysRef.current = (event: KeyboardEvent) => {
+      if (!isAttributeMenuOpen) {
+        return;
+      }
+      if (
+        attributeMenuRef.current?.contains(event.target as Node) ||
+        attributeToggleRef.current?.contains(event.target as Node)
+      ) {
+        if (event.key === 'Escape' || event.key === 'Tab') {
+          setIsAttributeMenuOpen(!isAttributeMenuOpen);
+          attributeToggleRef.current?.focus();
+        }
+      }
     };
-  }, [isAttributeMenuOpen, attributeMenuRef]);
+
+    handleAttributeClickOutsideRef.current = (event: MouseEvent) => {
+      if (isAttributeMenuOpen && !attributeMenuRef.current?.contains(event.target as Node)) {
+        setIsAttributeMenuOpen(false);
+      }
+    };
+  });
+
+  React.useEffect(() => {
+    const handleKeydown = (event: KeyboardEvent) => handleAttribueMenuKeysRef.current?.(event);
+    const handleClick = (event: MouseEvent) => handleAttributeClickOutsideRef.current?.(event);
+    window.addEventListener('keydown', handleKeydown);
+    window.addEventListener('click', handleClick);
+    return () => {
+      window.removeEventListener('keydown', handleKeydown);
+      window.removeEventListener('click', handleClick);
+    };
+  }, [isAttributeMenuOpen]);
 
   const onAttributeToggleClick = (ev: React.MouseEvent) => {
     ev.stopPropagation();
@@ -251,7 +266,7 @@ export const AccountsToolbar: React.FunctionComponent<AccountsToolbarProps> = ({
         triggerRef={attributeToggleRef}
         popper={attributeMenu}
         popperRef={attributeMenuRef}
-        appendTo={attributeContainerRef.current || undefined}
+        appendTo={attributeContainerElement || undefined}
         isVisible={isAttributeMenuOpen}
       />
     </div>

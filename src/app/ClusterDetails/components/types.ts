@@ -1,3 +1,8 @@
+export enum PowerAction {
+  POWER_ON = 'Power on',
+  POWER_OFF = 'Power off',
+}
+
 export interface BaseAction {
   type: 'scheduled_action' | 'cron_action';
   operation: 'PowerOffCluster' | 'PowerOnCluster';

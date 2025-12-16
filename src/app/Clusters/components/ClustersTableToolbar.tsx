@@ -19,6 +19,7 @@ import React from 'react';
 import { ClustersTableToolbarProps } from '../types';
 import debounce from 'lodash.debounce';
 import { ResourceStatusApi, ProviderApi } from '@api';
+import { usePopperContainer } from '@app/hooks/usePopperContainer';
 
 export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarProps> = ({
   clusterNameSearch,
@@ -66,31 +67,38 @@ export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarP
   const [isStatusMenuOpen, setIsStatusMenuOpen] = React.useState<boolean>(false);
   const statusToggleRef = React.useRef<HTMLButtonElement>(null);
   const statusMenuRef = React.useRef<HTMLDivElement>(null);
-  const statusContainerRef = React.useRef<HTMLDivElement>(null);
+  const { containerRef: statusContainerRef, containerElement: statusContainerElement } = usePopperContainer();
 
-  const handleStatusMenuKeys = (event: KeyboardEvent) => {
-    if (isStatusMenuOpen && statusMenuRef.current?.contains(event.target as Node)) {
-      if (event.key === 'Escape' || event.key === 'Tab') {
-        setIsStatusMenuOpen(!isStatusMenuOpen);
-        statusToggleRef.current?.focus();
-      }
-    }
-  };
-
-  const handleStatusClickOutside = (event: MouseEvent) => {
-    if (isStatusMenuOpen && !statusMenuRef.current?.contains(event.target as Node)) {
-      setIsStatusMenuOpen(false);
-    }
-  };
+  const handleStatusMenuKeysRef = React.useRef<(event: KeyboardEvent) => void>();
+  const handleStatusClickOutsideRef = React.useRef<(event: MouseEvent) => void>();
 
   React.useEffect(() => {
-    window.addEventListener('keydown', handleStatusMenuKeys);
-    window.addEventListener('click', handleStatusClickOutside);
-    return () => {
-      window.removeEventListener('keydown', handleStatusMenuKeys);
-      window.removeEventListener('click', handleStatusClickOutside);
+    handleStatusMenuKeysRef.current = (event: KeyboardEvent) => {
+      if (isStatusMenuOpen && statusMenuRef.current?.contains(event.target as Node)) {
+        if (event.key === 'Escape' || event.key === 'Tab') {
+          setIsStatusMenuOpen(!isStatusMenuOpen);
+          statusToggleRef.current?.focus();
+        }
+      }
     };
-  }, [isStatusMenuOpen, statusMenuRef]);
+
+    handleStatusClickOutsideRef.current = (event: MouseEvent) => {
+      if (isStatusMenuOpen && !statusMenuRef.current?.contains(event.target as Node)) {
+        setIsStatusMenuOpen(false);
+      }
+    };
+  });
+
+  React.useEffect(() => {
+    const handleKeydown = (event: KeyboardEvent) => handleStatusMenuKeysRef.current?.(event);
+    const handleClick = (event: MouseEvent) => handleStatusClickOutsideRef.current?.(event);
+    window.addEventListener('keydown', handleKeydown);
+    window.addEventListener('click', handleClick);
+    return () => {
+      window.removeEventListener('keydown', handleKeydown);
+      window.removeEventListener('click', handleClick);
+    };
+  }, [isStatusMenuOpen]);
 
   const onStatusToggleClick = (ev: React.MouseEvent) => {
     ev.stopPropagation();
@@ -148,7 +156,7 @@ export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarP
         triggerRef={statusToggleRef}
         popper={statusMenu}
         popperRef={statusMenuRef}
-        appendTo={statusContainerRef.current || undefined}
+        appendTo={statusContainerElement || undefined}
         isVisible={isStatusMenuOpen}
       />
     </div>
@@ -158,31 +166,38 @@ export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarP
   const [isProviderMenuOpen, setIsProviderMenuOpen] = React.useState<boolean>(false);
   const providerToggleRef = React.useRef<HTMLButtonElement>(null);
   const providerMenuRef = React.useRef<HTMLDivElement>(null);
-  const providerContainerRef = React.useRef<HTMLDivElement>(null);
+  const { containerRef: providerContainerRef, containerElement: providerContainerElement } = usePopperContainer();
 
-  const handleProviderMenuKeys = (event: KeyboardEvent) => {
-    if (isProviderMenuOpen && providerMenuRef.current?.contains(event.target as Node)) {
-      if (event.key === 'Escape' || event.key === 'Tab') {
-        setIsProviderMenuOpen(!isProviderMenuOpen);
-        providerToggleRef.current?.focus();
-      }
-    }
-  };
-
-  const handleProviderClickOutside = (event: MouseEvent) => {
-    if (isProviderMenuOpen && !providerMenuRef.current?.contains(event.target as Node)) {
-      setIsProviderMenuOpen(false);
-    }
-  };
+  const handleProviderMenuKeysRef = React.useRef<(event: KeyboardEvent) => void>();
+  const handleProviderClickOutsideRef = React.useRef<(event: MouseEvent) => void>();
 
   React.useEffect(() => {
-    window.addEventListener('keydown', handleProviderMenuKeys);
-    window.addEventListener('click', handleProviderClickOutside);
-    return () => {
-      window.removeEventListener('keydown', handleProviderMenuKeys);
-      window.removeEventListener('click', handleProviderClickOutside);
+    handleProviderMenuKeysRef.current = (event: KeyboardEvent) => {
+      if (isProviderMenuOpen && providerMenuRef.current?.contains(event.target as Node)) {
+        if (event.key === 'Escape' || event.key === 'Tab') {
+          setIsProviderMenuOpen(!isProviderMenuOpen);
+          providerToggleRef.current?.focus();
+        }
+      }
     };
-  }, [isProviderMenuOpen, providerMenuRef]);
+
+    handleProviderClickOutsideRef.current = (event: MouseEvent) => {
+      if (isProviderMenuOpen && !providerMenuRef.current?.contains(event.target as Node)) {
+        setIsProviderMenuOpen(false);
+      }
+    };
+  });
+
+  React.useEffect(() => {
+    const handleKeydown = (event: KeyboardEvent) => handleProviderMenuKeysRef.current?.(event);
+    const handleClick = (event: MouseEvent) => handleProviderClickOutsideRef.current?.(event);
+    window.addEventListener('keydown', handleKeydown);
+    window.addEventListener('click', handleClick);
+    return () => {
+      window.removeEventListener('keydown', handleKeydown);
+      window.removeEventListener('click', handleClick);
+    };
+  }, [isProviderMenuOpen]);
 
   const onProviderMenuToggleClick = (ev: React.MouseEvent) => {
     ev.stopPropagation();
@@ -273,7 +288,7 @@ export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarP
         triggerRef={providerToggleRef}
         popper={providerMenu}
         popperRef={providerMenuRef}
-        appendTo={providerContainerRef.current || undefined}
+        appendTo={providerContainerElement || undefined}
         isVisible={isProviderMenuOpen}
       />
     </div>
@@ -282,37 +297,44 @@ export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarP
   const [isAttributeMenuOpen, setIsAttributeMenuOpen] = React.useState(false);
   const attributeToggleRef = React.useRef<HTMLButtonElement>(null);
   const attributeMenuRef = React.useRef<HTMLDivElement>(null);
-  const attributeContainerRef = React.useRef<HTMLDivElement>(null);
+  const { containerRef: attributeContainerRef, containerElement: attributeContainerElement } = usePopperContainer();
 
-  const handleAttributeMenuKeys = (event: KeyboardEvent) => {
-    if (!isAttributeMenuOpen) {
-      return;
-    }
-    if (
-      attributeMenuRef.current?.contains(event.target as Node) ||
-      attributeToggleRef.current?.contains(event.target as Node)
-    ) {
-      if (event.key === 'Escape' || event.key === 'Tab') {
-        setIsAttributeMenuOpen(!isAttributeMenuOpen);
-        attributeToggleRef.current?.focus();
-      }
-    }
-  };
-
-  const handleAttributeClickOutside = (event: MouseEvent) => {
-    if (isAttributeMenuOpen && !attributeMenuRef.current?.contains(event.target as Node)) {
-      setIsAttributeMenuOpen(false);
-    }
-  };
+  const handleAttributeMenuKeysRef = React.useRef<(event: KeyboardEvent) => void>();
+  const handleAttributeClickOutsideRef = React.useRef<(event: MouseEvent) => void>();
 
   React.useEffect(() => {
-    window.addEventListener('keydown', handleAttributeMenuKeys);
-    window.addEventListener('click', handleAttributeClickOutside);
-    return () => {
-      window.removeEventListener('keydown', handleAttributeMenuKeys);
-      window.removeEventListener('click', handleAttributeClickOutside);
+    handleAttributeMenuKeysRef.current = (event: KeyboardEvent) => {
+      if (!isAttributeMenuOpen) {
+        return;
+      }
+      if (
+        attributeMenuRef.current?.contains(event.target as Node) ||
+        attributeToggleRef.current?.contains(event.target as Node)
+      ) {
+        if (event.key === 'Escape' || event.key === 'Tab') {
+          setIsAttributeMenuOpen(!isAttributeMenuOpen);
+          attributeToggleRef.current?.focus();
+        }
+      }
     };
-  }, [isAttributeMenuOpen, attributeMenuRef]);
+
+    handleAttributeClickOutsideRef.current = (event: MouseEvent) => {
+      if (isAttributeMenuOpen && !attributeMenuRef.current?.contains(event.target as Node)) {
+        setIsAttributeMenuOpen(false);
+      }
+    };
+  });
+
+  React.useEffect(() => {
+    const handleKeydown = (event: KeyboardEvent) => handleAttributeMenuKeysRef.current?.(event);
+    const handleClick = (event: MouseEvent) => handleAttributeClickOutsideRef.current?.(event);
+    window.addEventListener('keydown', handleKeydown);
+    window.addEventListener('click', handleClick);
+    return () => {
+      window.removeEventListener('keydown', handleKeydown);
+      window.removeEventListener('click', handleClick);
+    };
+  }, [isAttributeMenuOpen]);
 
   const onAttributeToggleClick = (ev: React.MouseEvent) => {
     ev.stopPropagation();
@@ -364,7 +386,7 @@ export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarP
         triggerRef={attributeToggleRef}
         popper={attributeMenu}
         popperRef={attributeMenuRef}
-        appendTo={attributeContainerRef.current || undefined}
+        appendTo={attributeContainerElement || undefined}
         isVisible={isAttributeMenuOpen}
       />
     </div>

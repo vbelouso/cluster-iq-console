@@ -3,11 +3,7 @@ import { Dropdown, DropdownItem, DropdownList, MenuToggle, MenuToggleElement } f
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { ModalPowerManagement } from './ModalPowerManagement';
-
-export enum PowerAction {
-  POWER_ON = 'Power on',
-  POWER_OFF = 'Power off',
-}
+import { PowerAction } from './types';
 
 interface ClusterDetailsDropdownProps {
   clusterStatus: ResourceStatusApi | null;

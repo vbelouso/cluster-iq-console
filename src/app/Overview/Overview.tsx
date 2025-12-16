@@ -15,7 +15,7 @@ import {
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
 import { generateCards } from './components/CardData';
 import { ProviderApi } from '@api';
-import { renderContent } from './components/CardRenderer';
+import { renderContent } from './utils/cardRendererUtils.tsx';
 import { useDashboardData } from './hooks/useDashboardData';
 import { useEventsData } from './hooks/useEventsData';
 

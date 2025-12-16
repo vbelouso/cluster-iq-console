@@ -19,6 +19,7 @@ import React from 'react';
 import debounce from 'lodash.debounce';
 import { ClusterActions, ScheduledActionStatus } from '@app/types/types';
 import { SchedulerTableToolbarProps } from './types';
+import { usePopperContainer } from '@app/hooks/usePopperContainer';
 
 type AttributeMenuOption = 'Account' | 'Action' | 'Type' | 'Status' | 'Enabled';
 
@@ -56,31 +57,38 @@ export const SchedulerTableToolbar: React.FunctionComponent<SchedulerTableToolba
   const [isActionMenuOpen, setIsActionMenuOpen] = React.useState<boolean>(false);
   const actionToggleRef = React.useRef<HTMLButtonElement>(null);
   const actionMenuRef = React.useRef<HTMLDivElement>(null);
-  const actionContainerRef = React.useRef<HTMLDivElement>(null);
+  const { containerRef: actionContainerRef, containerElement: actionContainerElement } = usePopperContainer();
 
-  const handleActionMenuKeys = (event: KeyboardEvent) => {
-    if (isActionMenuOpen && actionMenuRef.current?.contains(event.target as Node)) {
-      if (event.key === 'Escape' || event.key === 'Tab') {
-        setIsActionMenuOpen(!isActionMenuOpen);
-        actionToggleRef.current?.focus();
-      }
-    }
-  };
-
-  const handleActionClickOutside = (event: MouseEvent) => {
-    if (isActionMenuOpen && !actionMenuRef.current?.contains(event.target as Node)) {
-      setIsActionMenuOpen(false);
-    }
-  };
+  const handleActionMenuKeysRef = React.useRef<(event: KeyboardEvent) => void>();
+  const handleActionClickOutsideRef = React.useRef<(event: MouseEvent) => void>();
 
   React.useEffect(() => {
-    window.addEventListener('keydown', handleActionMenuKeys);
-    window.addEventListener('click', handleActionClickOutside);
-    return () => {
-      window.removeEventListener('keydown', handleActionMenuKeys);
-      window.removeEventListener('click', handleActionClickOutside);
+    handleActionMenuKeysRef.current = (event: KeyboardEvent) => {
+      if (isActionMenuOpen && actionMenuRef.current?.contains(event.target as Node)) {
+        if (event.key === 'Escape' || event.key === 'Tab') {
+          setIsActionMenuOpen(!isActionMenuOpen);
+          actionToggleRef.current?.focus();
+        }
+      }
     };
-  }, [isActionMenuOpen, actionMenuRef]);
+
+    handleActionClickOutsideRef.current = (event: MouseEvent) => {
+      if (isActionMenuOpen && !actionMenuRef.current?.contains(event.target as Node)) {
+        setIsActionMenuOpen(false);
+      }
+    };
+  });
+
+  React.useEffect(() => {
+    const handleKeydown = (event: KeyboardEvent) => handleActionMenuKeysRef.current?.(event);
+    const handleClick = (event: MouseEvent) => handleActionClickOutsideRef.current?.(event);
+    window.addEventListener('keydown', handleKeydown);
+    window.addEventListener('click', handleClick);
+    return () => {
+      window.removeEventListener('keydown', handleKeydown);
+      window.removeEventListener('click', handleClick);
+    };
+  }, [isActionMenuOpen]);
 
   const onActionMenuToggleClick = (ev: React.MouseEvent) => {
     ev.stopPropagation();
@@ -151,7 +159,7 @@ export const SchedulerTableToolbar: React.FunctionComponent<SchedulerTableToolba
         triggerRef={actionToggleRef}
         popper={actionMenu}
         popperRef={actionMenuRef}
-        appendTo={actionContainerRef.current || undefined}
+        appendTo={actionContainerElement || undefined}
         isVisible={isActionMenuOpen}
       />
     </div>
@@ -161,31 +169,38 @@ export const SchedulerTableToolbar: React.FunctionComponent<SchedulerTableToolba
   const [isTypeMenuOpen, setIsTypeMenuOpen] = React.useState<boolean>(false);
   const typeToggleRef = React.useRef<HTMLButtonElement>(null);
   const typeMenuRef = React.useRef<HTMLDivElement>(null);
-  const typeContainerRef = React.useRef<HTMLDivElement>(null);
+  const { containerRef: typeContainerRef, containerElement: typeContainerElement } = usePopperContainer();
 
-  const handleTypeMenuKeys = (event: KeyboardEvent) => {
-    if (isTypeMenuOpen && typeMenuRef.current?.contains(event.target as Node)) {
-      if (event.key === 'Escape' || event.key === 'Tab') {
-        setIsTypeMenuOpen(!isTypeMenuOpen);
-        typeToggleRef.current?.focus();
-      }
-    }
-  };
-
-  const handleTypeClickOutside = (event: MouseEvent) => {
-    if (isTypeMenuOpen && !typeMenuRef.current?.contains(event.target as Node)) {
-      setIsTypeMenuOpen(false);
-    }
-  };
+  const handleTypeMenuKeysRef = React.useRef<(event: KeyboardEvent) => void>();
+  const handleTypeClickOutsideRef = React.useRef<(event: MouseEvent) => void>();
 
   React.useEffect(() => {
-    window.addEventListener('keydown', handleTypeMenuKeys);
-    window.addEventListener('click', handleTypeClickOutside);
-    return () => {
-      window.removeEventListener('keydown', handleTypeMenuKeys);
-      window.removeEventListener('click', handleTypeClickOutside);
+    handleTypeMenuKeysRef.current = (event: KeyboardEvent) => {
+      if (isTypeMenuOpen && typeMenuRef.current?.contains(event.target as Node)) {
+        if (event.key === 'Escape' || event.key === 'Tab') {
+          setIsTypeMenuOpen(!isTypeMenuOpen);
+          typeToggleRef.current?.focus();
+        }
+      }
     };
-  }, [isTypeMenuOpen, typeMenuRef]);
+
+    handleTypeClickOutsideRef.current = (event: MouseEvent) => {
+      if (isTypeMenuOpen && !typeMenuRef.current?.contains(event.target as Node)) {
+        setIsTypeMenuOpen(false);
+      }
+    };
+  });
+
+  React.useEffect(() => {
+    const handleKeydown = (event: KeyboardEvent) => handleTypeMenuKeysRef.current?.(event);
+    const handleClick = (event: MouseEvent) => handleTypeClickOutsideRef.current?.(event);
+    window.addEventListener('keydown', handleKeydown);
+    window.addEventListener('click', handleClick);
+    return () => {
+      window.removeEventListener('keydown', handleKeydown);
+      window.removeEventListener('click', handleClick);
+    };
+  }, [isTypeMenuOpen]);
 
   const onTypeMenuToggleClick = (ev: React.MouseEvent) => {
     ev.stopPropagation();
@@ -251,7 +266,7 @@ export const SchedulerTableToolbar: React.FunctionComponent<SchedulerTableToolba
         triggerRef={typeToggleRef}
         popper={typeMenu}
         popperRef={typeMenuRef}
-        appendTo={typeContainerRef.current || undefined}
+        appendTo={typeContainerElement || undefined}
         isVisible={isTypeMenuOpen}
       />
     </div>
@@ -263,29 +278,36 @@ export const SchedulerTableToolbar: React.FunctionComponent<SchedulerTableToolba
   const statusMenuRef = React.useRef<HTMLDivElement>(null);
   const statusContainerRef = React.useRef<HTMLDivElement>(null);
 
-  const handleStatusMenuKeys = (event: KeyboardEvent) => {
-    if (isStatusMenuOpen && statusMenuRef.current?.contains(event.target as Node)) {
-      if (event.key === 'Escape' || event.key === 'Tab') {
-        setIsStatusMenuOpen(!isStatusMenuOpen);
-        statusToggleRef.current?.focus();
-      }
-    }
-  };
-
-  const handleStatusClickOutside = (event: MouseEvent) => {
-    if (isStatusMenuOpen && !statusMenuRef.current?.contains(event.target as Node)) {
-      setIsStatusMenuOpen(false);
-    }
-  };
+  const handleStatusMenuKeysRef = React.useRef<(event: KeyboardEvent) => void>();
+  const handleStatusClickOutsideRef = React.useRef<(event: MouseEvent) => void>();
 
   React.useEffect(() => {
-    window.addEventListener('keydown', handleStatusMenuKeys);
-    window.addEventListener('click', handleStatusClickOutside);
-    return () => {
-      window.removeEventListener('keydown', handleStatusMenuKeys);
-      window.removeEventListener('click', handleStatusClickOutside);
+    handleStatusMenuKeysRef.current = (event: KeyboardEvent) => {
+      if (isStatusMenuOpen && statusMenuRef.current?.contains(event.target as Node)) {
+        if (event.key === 'Escape' || event.key === 'Tab') {
+          setIsStatusMenuOpen(!isStatusMenuOpen);
+          statusToggleRef.current?.focus();
+        }
+      }
     };
-  }, [isStatusMenuOpen, statusMenuRef]);
+
+    handleStatusClickOutsideRef.current = (event: MouseEvent) => {
+      if (isStatusMenuOpen && !statusMenuRef.current?.contains(event.target as Node)) {
+        setIsStatusMenuOpen(false);
+      }
+    };
+  });
+
+  React.useEffect(() => {
+    const handleKeydown = (event: KeyboardEvent) => handleStatusMenuKeysRef.current?.(event);
+    const handleClick = (event: MouseEvent) => handleStatusClickOutsideRef.current?.(event);
+    window.addEventListener('keydown', handleKeydown);
+    window.addEventListener('click', handleClick);
+    return () => {
+      window.removeEventListener('keydown', handleKeydown);
+      window.removeEventListener('click', handleClick);
+    };
+  }, [isStatusMenuOpen]);
 
   const onStatusMenuToggleClick = (ev: React.MouseEvent) => {
     ev.stopPropagation();
@@ -378,7 +400,7 @@ export const SchedulerTableToolbar: React.FunctionComponent<SchedulerTableToolba
         triggerRef={statusToggleRef}
         popper={statusMenu}
         popperRef={statusMenuRef}
-        appendTo={statusContainerRef.current || undefined}
+        appendTo={statusContainerElement || undefined}
         isVisible={isStatusMenuOpen}
       />
     </div>
@@ -388,31 +410,38 @@ export const SchedulerTableToolbar: React.FunctionComponent<SchedulerTableToolba
   const [isEnabledMenuOpen, setIsEnabledMenuOpen] = React.useState<boolean>(false);
   const enabledToggleRef = React.useRef<HTMLButtonElement>(null);
   const enabledMenuRef = React.useRef<HTMLDivElement>(null);
-  const enabledContainerRef = React.useRef<HTMLDivElement>(null);
+  const { containerRef: enabledContainerRef, containerElement: enabledContainerElement } = usePopperContainer();
 
-  const handleEnabledMenuKeys = (event: KeyboardEvent) => {
-    if (isEnabledMenuOpen && enabledMenuRef.current?.contains(event.target as Node)) {
-      if (event.key === 'Escape' || event.key === 'Tab') {
-        setIsEnabledMenuOpen(false);
-        enabledToggleRef.current?.focus();
-      }
-    }
-  };
-
-  const handleEnabledClickOutside = (event: MouseEvent) => {
-    if (isEnabledMenuOpen && !enabledMenuRef.current?.contains(event.target as Node)) {
-      setIsEnabledMenuOpen(false);
-    }
-  };
+  const handleEnabledMenuKeysRef = React.useRef<(event: KeyboardEvent) => void>();
+  const handleEnabledClickOutsideRef = React.useRef<(event: MouseEvent) => void>();
 
   React.useEffect(() => {
-    window.addEventListener('keydown', handleEnabledMenuKeys);
-    window.addEventListener('click', handleEnabledClickOutside);
-    return () => {
-      window.removeEventListener('keydown', handleEnabledMenuKeys);
-      window.removeEventListener('click', handleEnabledClickOutside);
+    handleEnabledMenuKeysRef.current = (event: KeyboardEvent) => {
+      if (isEnabledMenuOpen && enabledMenuRef.current?.contains(event.target as Node)) {
+        if (event.key === 'Escape' || event.key === 'Tab') {
+          setIsEnabledMenuOpen(false);
+          enabledToggleRef.current?.focus();
+        }
+      }
     };
-  }, [isEnabledMenuOpen, enabledMenuRef]);
+
+    handleEnabledClickOutsideRef.current = (event: MouseEvent) => {
+      if (isEnabledMenuOpen && !enabledMenuRef.current?.contains(event.target as Node)) {
+        setIsEnabledMenuOpen(false);
+      }
+    };
+  });
+
+  React.useEffect(() => {
+    const handleKeydown = (event: KeyboardEvent) => handleEnabledMenuKeysRef.current?.(event);
+    const handleClick = (event: MouseEvent) => handleEnabledClickOutsideRef.current?.(event);
+    window.addEventListener('keydown', handleKeydown);
+    window.addEventListener('click', handleClick);
+    return () => {
+      window.removeEventListener('keydown', handleKeydown);
+      window.removeEventListener('click', handleClick);
+    };
+  }, [isEnabledMenuOpen]);
 
   const onEnabledMenuToggleClick = (ev: React.MouseEvent) => {
     ev.stopPropagation();
@@ -470,7 +499,7 @@ export const SchedulerTableToolbar: React.FunctionComponent<SchedulerTableToolba
         triggerRef={enabledToggleRef}
         popper={enabledMenu}
         popperRef={enabledMenuRef}
-        appendTo={enabledContainerRef.current || undefined}
+        appendTo={enabledContainerElement || undefined}
         isVisible={isEnabledMenuOpen}
       />
     </div>
@@ -481,37 +510,44 @@ export const SchedulerTableToolbar: React.FunctionComponent<SchedulerTableToolba
   const [isAttributeMenuOpen, setIsAttributeMenuOpen] = React.useState(false);
   const attributeToggleRef = React.useRef<HTMLButtonElement>(null);
   const attributeMenuRef = React.useRef<HTMLDivElement>(null);
-  const attributeContainerRef = React.useRef<HTMLDivElement>(null);
+  const { containerRef: attributeContainerRef, containerElement: attributeContainerElement } = usePopperContainer();
 
-  const handleAttributeMenuKeys = (event: KeyboardEvent) => {
-    if (!isAttributeMenuOpen) {
-      return;
-    }
-    if (
-      attributeMenuRef.current?.contains(event.target as Node) ||
-      attributeToggleRef.current?.contains(event.target as Node)
-    ) {
-      if (event.key === 'Escape' || event.key === 'Tab') {
-        setIsAttributeMenuOpen(!isAttributeMenuOpen);
-        attributeToggleRef.current?.focus();
-      }
-    }
-  };
-
-  const handleAttributeClickOutside = (event: MouseEvent) => {
-    if (isAttributeMenuOpen && !attributeMenuRef.current?.contains(event.target as Node)) {
-      setIsAttributeMenuOpen(false);
-    }
-  };
+  const handleAttributeMenuKeysRef = React.useRef<(event: KeyboardEvent) => void>();
+  const handleAttributeClickOutsideRef = React.useRef<(event: MouseEvent) => void>();
 
   React.useEffect(() => {
-    window.addEventListener('keydown', handleAttributeMenuKeys);
-    window.addEventListener('click', handleAttributeClickOutside);
-    return () => {
-      window.removeEventListener('keydown', handleAttributeMenuKeys);
-      window.removeEventListener('click', handleAttributeClickOutside);
+    handleAttributeMenuKeysRef.current = (event: KeyboardEvent) => {
+      if (!isAttributeMenuOpen) {
+        return;
+      }
+      if (
+        attributeMenuRef.current?.contains(event.target as Node) ||
+        attributeToggleRef.current?.contains(event.target as Node)
+      ) {
+        if (event.key === 'Escape' || event.key === 'Tab') {
+          setIsAttributeMenuOpen(!isAttributeMenuOpen);
+          attributeToggleRef.current?.focus();
+        }
+      }
     };
-  }, [isAttributeMenuOpen, attributeMenuRef]);
+
+    handleAttributeClickOutsideRef.current = (event: MouseEvent) => {
+      if (isAttributeMenuOpen && !attributeMenuRef.current?.contains(event.target as Node)) {
+        setIsAttributeMenuOpen(false);
+      }
+    };
+  });
+
+  React.useEffect(() => {
+    const handleKeydown = (event: KeyboardEvent) => handleAttributeMenuKeysRef.current?.(event);
+    const handleClick = (event: MouseEvent) => handleAttributeClickOutsideRef.current?.(event);
+    window.addEventListener('keydown', handleKeydown);
+    window.addEventListener('click', handleClick);
+    return () => {
+      window.removeEventListener('keydown', handleKeydown);
+      window.removeEventListener('click', handleClick);
+    };
+  }, [isAttributeMenuOpen]);
 
   const onAttributeToggleClick = (ev: React.MouseEvent) => {
     ev.stopPropagation();
@@ -565,7 +601,7 @@ export const SchedulerTableToolbar: React.FunctionComponent<SchedulerTableToolba
         triggerRef={attributeToggleRef}
         popper={attributeMenu}
         popperRef={attributeMenuRef}
-        appendTo={attributeContainerRef.current || undefined}
+        appendTo={attributeContainerElement || undefined}
         isVisible={isAttributeMenuOpen}
       />
     </div>

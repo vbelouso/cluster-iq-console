@@ -66,22 +66,38 @@ export const ClusterDetailsEvents: React.FunctionComponent = () => {
   const { clusterID } = useParams();
 
   useEffect(() => {
+    if (!clusterID) {
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
     const fetchData = async () => {
       try {
         const { data: clusterEvents } = await api.clusters.eventsList(clusterID);
-        // TODO. Move to debug
-        console.log('Fetched events:', clusterEvents);
-        setData(clusterEvents.items || []);
+        if (!cancelled) {
+          // TODO. Move to debug
+          console.log('Fetched events:', clusterEvents);
+          setData(clusterEvents.items || []);
+        }
       } catch (error) {
-        // TODO. Move to debug
-        console.error('Error fetching events:', error);
+        if (!cancelled) {
+          // TODO. Move to debug
+          console.error('Error fetching events:', error);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
     fetchData();
-  }, []);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [clusterID]);
 
   // TODO. Move to debug
   console.log('Rendered events data:', data);

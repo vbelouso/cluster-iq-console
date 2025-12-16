@@ -6,19 +6,20 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 
 const ClusterDetailsInstances: React.FunctionComponent = () => {
+  const { clusterID } = useParams();
   const [data, setData] = useState<InstanceResponseApi[]>([]);
   const [loading, setLoading] = useState(true);
-  const { clusterID } = useParams();
-
-  if (!clusterID) {
-    return <LoadingSpinner />;
-  }
+  //### Sorting ###
+  // Index of the currently active column
+  const [activeSortIndex, setActiveSortIndex] = React.useState<number | undefined>(0);
+  // sort direction of the currently active column
+  const [activeSortDirection, setActiveSortDirection] = React.useState<'asc' | 'desc' | undefined>('asc');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         console.log('Fetching data...');
-        const { data: fetchedInstancesPerCluster } = await api.clusters.instancesList(clusterID);
+        const { data: fetchedInstancesPerCluster } = await api.clusters.instancesList(clusterID!);
         console.log('Fetched data:', fetchedInstancesPerCluster);
         setData(fetchedInstancesPerCluster);
       } catch (error) {
@@ -31,13 +32,11 @@ const ClusterDetailsInstances: React.FunctionComponent = () => {
     fetchData();
   }, [clusterID]);
 
-  console.log('Rendered with data:', data);
+  if (!clusterID) {
+    return <LoadingSpinner />;
+  }
 
-  //### Sorting ###
-  // Index of the currently active column
-  const [activeSortIndex, setActiveSortIndex] = React.useState<number | undefined>(0);
-  // sort direction of the currently active column
-  const [activeSortDirection, setActiveSortDirection] = React.useState<'asc' | 'desc' | undefined>('asc');
+  console.log('Rendered with data:', data);
   // sort dropdown expansion
   const getSortableRowValues = (instance: InstanceResponseApi): (string | number | null | undefined)[] => {
     const { instanceId, instanceName, availabilityZone, instanceType, status, clusterId, provider } = instance;
