@@ -4,8 +4,8 @@ on:
   pull_request:
 
 jobs:
-  golangci:
-    name: Go code format check
+  typescript-lint:
+    name: TypeScript code validation
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
