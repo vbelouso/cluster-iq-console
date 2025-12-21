@@ -38,6 +38,22 @@ export class Actions<SecurityDataType = unknown> {
       ...params,
     });
   /**
+   * @description Patch an existing actions by ID.
+   *
+   * @tags Actions
+   * @name ActionsPartialUpdate
+   * @summary Update an actions
+   * @request PATCH:/actions/
+   */
+  actionsPartialUpdate = (action: ActionRequestApi, params: RequestParams = {}) =>
+    this.http.request<void, GenericErrorResponseApi>({
+      path: `/actions/`,
+      method: 'PATCH',
+      body: action,
+      type: ContentType.Json,
+      ...params,
+    });
+  /**
    * @description Delete an action by ID.
    *
    * @tags Actions

@@ -69,6 +69,14 @@ export interface ActionResponseApi {
   type?: string;
 }
 
+export enum ActionStatusApi {
+  StatusPending = 'Pending',
+  StatusRunning = 'Running',
+  StatusFailed = 'Failed',
+  StatusSuccess = 'Success',
+  StatusUnknown = 'Unknown',
+}
+
 export interface ActionTargetApi {
   accountName?: string;
   clusterId?: string;
@@ -85,9 +93,9 @@ export interface ClusterEventResponseApi {
   action?: string;
   description?: string;
   id?: number;
-  resourceId?: string;
+  resourceName?: string;
   resourceType?: string;
-  result?: string;
+  result?: ActionStatusApi;
   severity?: string;
   timestamp?: string;
   triggeredBy?: string;
@@ -299,9 +307,9 @@ export interface SystemEventResponseApi {
   description?: string;
   id?: number;
   provider?: string;
-  resourceId?: string;
+  resourceName?: string;
   resourceType?: string;
-  result?: string;
+  result?: ActionStatusApi;
   severity?: string;
   timestamp?: string;
   triggeredBy?: string;

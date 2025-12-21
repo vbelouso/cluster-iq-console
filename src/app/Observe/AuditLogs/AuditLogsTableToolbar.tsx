@@ -20,6 +20,7 @@ import { AuditLogsTableToolbarProps } from './types';
 import debounce from 'lodash.debounce';
 import { ClusterActions, ResultStatus } from '@app/types/types';
 import { usePopperContainer } from '@app/hooks/usePopperContainer';
+import { ProviderApi } from '@api';
 
 type AttributeMenuOption = 'Account' | 'Provider' | 'Action' | 'Result' | 'TriggeredBy';
 

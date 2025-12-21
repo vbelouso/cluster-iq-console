@@ -89,11 +89,11 @@ export const AuditLogsTable: React.FunctionComponent<AuditLogsTableProps> = ({
   }, [data, accountName, action, provider, result, triggered_by, page, perPage]);
 
   const getSortableRowValues = (event: SystemEventResponseApi): (string | number | null)[] => {
-    const { action, result, resourceId, accountId, provider, triggeredBy, description, timestamp } = event;
+    const { action, result, resourceName, accountId, provider, triggeredBy, description, timestamp } = event;
     return [
       action ?? null,
       result ?? null,
-      resourceId ?? null,
+      resourceName ?? null,
       accountId ?? null,
       provider ?? null,
       triggeredBy ?? null,
@@ -135,18 +135,20 @@ export const AuditLogsTable: React.FunctionComponent<AuditLogsTableProps> = ({
                 {getResultIcon(event.result as ResultStatus)} {event.result}
               </Td>
               {/*TODO. Hardcoded, adjust later if needed*/}
-              <Td dataLabel={event.resourceId}>
+              <Td dataLabel={event.resourceName}>
                 <Link
                   to={
                     event.resourceType === 'instance'
-                      ? `/instances/${event.resourceId}`
-                      : `/clusters/${event.resourceId}`
+                      ? `/instances/${event.resourceName}`
+                      : `/clusters/${event.resourceName}`
                   }
                 >
-                  {event.resourceId}
+                  {event.resourceName}
                 </Link>
               </Td>
-              <Td>{event.accountId}</Td>
+              <Td>
+                <Link to={`/accounts/${event.accountId}`}>{event.accountId}</Link>
+              </Td>
               <Td>{event.provider}</Td>
               <Td>{event.triggeredBy}</Td>
               <Td>{event.description}</Td>
