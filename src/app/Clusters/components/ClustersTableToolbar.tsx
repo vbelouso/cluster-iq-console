@@ -13,6 +13,7 @@ import {
   ToolbarGroup,
   ToolbarItem,
   ToolbarFilter,
+  Switch,
 } from '@patternfly/react-core';
 import { FilterIcon } from '@patternfly/react-icons';
 import React from 'react';
@@ -30,6 +31,8 @@ export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarP
   setStatusSelection,
   providerSelections,
   setProviderSelections,
+  showTerminated,
+  setShowTerminated,
 }) => {
   const debouncedClusterSearch = React.useMemo(() => debounce(setClusterNameSearch, 300), [setClusterNameSearch]);
   const debouncedAccountSearch = React.useMemo(() => debounce(setAccountNameSearch, 300), [setAccountNameSearch]);
@@ -445,6 +448,15 @@ export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarP
             </ToolbarFilter>
           </ToolbarGroup>
         </ToolbarToggleGroup>
+        <ToolbarItem>
+          <Switch
+            id="show-terminated-clusters"
+            label="Show terminated clusters"
+            labelOff="Show terminated clusters"
+            isChecked={showTerminated}
+            onChange={(_event, checked) => setShowTerminated(checked)}
+          />
+        </ToolbarItem>
       </ToolbarContent>
     </Toolbar>
   );

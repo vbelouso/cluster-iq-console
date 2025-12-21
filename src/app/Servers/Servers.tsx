@@ -2,7 +2,7 @@ import { PageSection, PageSectionVariants, Panel, TextContent, Text } from '@pat
 import React from 'react';
 import ServersTableToolbar from './components/ServersTableToolbar';
 import ServersTable from './components/ServersTable';
-import { parseAsArrayOf, parseAsString, parseAsStringEnum, useQueryStates } from 'nuqs';
+import { parseAsArrayOf, parseAsString, parseAsStringEnum, parseAsBoolean, useQueryStates } from 'nuqs';
 import { ResourceStatusApi, ProviderApi } from '@api';
 
 const filterParams = {
@@ -12,10 +12,11 @@ const filterParams = {
   },
   provider: parseAsArrayOf(parseAsStringEnum<ProviderApi>(Object.values(ProviderApi))).withDefault([]),
   serverName: parseAsString.withDefault(''),
+  showTerminated: parseAsBoolean.withDefault(false),
 };
 
 const Servers: React.FunctionComponent = () => {
-  const [{ status, provider, serverName }, setQuery] = useQueryStates(filterParams);
+  const [{ status, provider, serverName, showTerminated }, setQuery] = useQueryStates(filterParams);
 
   return (
     <React.Fragment>
@@ -33,8 +34,15 @@ const Servers: React.FunctionComponent = () => {
             setStatusSelection={value => setQuery({ status: value })}
             providerSelections={provider}
             setProviderSelections={value => setQuery({ provider: value || [] })}
+            showTerminated={showTerminated}
+            setShowTerminated={value => setQuery({ showTerminated: value })}
           />
-          <ServersTable searchValue={serverName} statusSelection={status} providerSelections={provider} />
+          <ServersTable
+            searchValue={serverName}
+            statusSelection={status}
+            providerSelections={provider}
+            showTerminated={showTerminated}
+          />
         </Panel>
       </PageSection>
     </React.Fragment>

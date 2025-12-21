@@ -8,15 +8,18 @@ import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
 import { TablePagination } from '@app/components/common/TablesPagination';
 import { searchItems, filterByStatus, filterByProvider, sortItems, paginateItems } from '@app/utils/tableFilters';
 import { fetchAllPages } from '@app/utils/fetchAllPages';
+import { EmptyState, EmptyStateVariant, EmptyStateBody, EmptyStateIcon, Title } from '@patternfly/react-core';
+import { CubesIcon } from '@patternfly/react-icons';
 
 export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
   clusterNameSearch,
   accountNameSearch,
   statusFilter,
   providerSelections,
+  showTerminated,
 }) => {
   const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(20);
+  const [perPage, setPerPage] = useState(10);
   const [allClusters, setAllClusters] = useState<ClusterResponseApi[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -42,6 +45,10 @@ export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
   }, []);
 
   let processed = allClusters;
+
+  if (!showTerminated) {
+    processed = processed.filter(cluster => cluster.status !== 'Terminated');
+  }
 
   if (clusterNameSearch) {
     processed = searchItems(processed, clusterNameSearch, ['clusterName']);
@@ -94,48 +101,70 @@ export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
     columnIndex,
   });
 
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  if (processed.length === 0) {
+    return (
+      <EmptyState variant={EmptyStateVariant.sm}>
+        <EmptyStateIcon icon={CubesIcon} />
+        <Title headingLevel="h4" size="md">
+          No clusters found
+        </Title>
+        <EmptyStateBody>
+          {!showTerminated ? (
+            <>
+              There are no active clusters.
+              <br />
+              Toggle &apos;Show terminated clusters&apos; to view all clusters.
+            </>
+          ) : (
+            'No clusters found.'
+          )}
+        </EmptyStateBody>
+      </EmptyState>
+    );
+  }
+
   return (
     <React.Fragment>
-      {loading ? (
-        <LoadingSpinner />
-      ) : (
-        <Table aria-label="Clusters table">
-          <Thead>
-            <Tr>
-              <Th sort={getSortParams(0)}>{columnNames.id}</Th>
-              <Th sort={getSortParams(1)}>{columnNames.name}</Th>
-              <Th>{columnNames.status}</Th>
-              <Th sort={getSortParams(3)}>{columnNames.account}</Th>
-              <Th sort={getSortParams(4)}>{columnNames.cloudProvider}</Th>
-              <Th sort={getSortParams(5)}>{columnNames.region}</Th>
-              <Th sort={getSortParams(6)}>{columnNames.nodes}</Th>
-              <Th>{columnNames.console}</Th>
+      <Table aria-label="Clusters table">
+        <Thead>
+          <Tr>
+            <Th sort={getSortParams(0)}>{columnNames.id}</Th>
+            <Th sort={getSortParams(1)}>{columnNames.name}</Th>
+            <Th>{columnNames.status}</Th>
+            <Th sort={getSortParams(3)}>{columnNames.account}</Th>
+            <Th sort={getSortParams(4)}>{columnNames.cloudProvider}</Th>
+            <Th sort={getSortParams(5)}>{columnNames.region}</Th>
+            <Th sort={getSortParams(6)}>{columnNames.nodes}</Th>
+            <Th>{columnNames.console}</Th>
+          </Tr>
+        </Thead>
+        <Tbody>
+          {paginated.map(cluster => (
+            <Tr key={cluster.clusterId}>
+              <Td dataLabel={columnNames.id}>
+                <Link to={`/clusters/${cluster.clusterId}`}>{cluster.clusterId}</Link>
+              </Td>
+              <Td dataLabel={columnNames.name}>{cluster.clusterName}</Td>
+              <Td dataLabel={columnNames.status}>{renderStatusLabel(cluster.status)}</Td>
+              <Td dataLabel={columnNames.account}>
+                <Link to={`/accounts/${cluster.accountId}`}>{cluster.accountName}</Link>
+              </Td>
+              <Td dataLabel={columnNames.cloudProvider}>{cluster.provider}</Td>
+              <Td dataLabel={columnNames.region}>{cluster.region}</Td>
+              <Td dataLabel={columnNames.nodes}>{cluster.instanceCount}</Td>
+              <Td dataLabel={columnNames.console}>
+                <a href={cluster.consoleLink} target="_blank" rel="noopener noreferrer">
+                  Console
+                </a>
+              </Td>
             </Tr>
-          </Thead>
-          <Tbody>
-            {paginated.map(cluster => (
-              <Tr key={cluster.clusterId}>
-                <Td dataLabel={columnNames.id}>
-                  <Link to={`/clusters/${cluster.clusterId}`}>{cluster.clusterId}</Link>
-                </Td>
-                <Td dataLabel={columnNames.name}>{cluster.clusterName}</Td>
-                <Td dataLabel={columnNames.status}>{renderStatusLabel(cluster.status)}</Td>
-                <Td dataLabel={columnNames.account}>
-                  <Link to={`/accounts/${cluster.accountId}`}>{cluster.accountName}</Link>
-                </Td>
-                <Td dataLabel={columnNames.cloudProvider}>{cluster.provider}</Td>
-                <Td dataLabel={columnNames.region}>{cluster.region}</Td>
-                <Td dataLabel={columnNames.nodes}>{cluster.instanceCount}</Td>
-                <Td dataLabel={columnNames.console}>
-                  <a href={cluster.consoleLink} target="_blank" rel="noopener noreferrer">
-                    Console
-                  </a>
-                </Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      )}
+          ))}
+        </Tbody>
+      </Table>
       <TablePagination
         itemCount={processed.length}
         page={page}

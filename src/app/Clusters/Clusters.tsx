@@ -4,7 +4,6 @@ import ClustersTable from './components/ClustersTable';
 import ClustersTableToolbar from './components/ClustersTableToolbar';
 import { parseAsArrayOf, parseAsString, parseAsStringEnum, parseAsBoolean, useQueryStates } from 'nuqs';
 import { ResourceStatusApi, ProviderApi } from '@api';
-import { useLocation } from 'react-router-dom';
 
 const filterParams = {
   status: {
@@ -14,32 +13,17 @@ const filterParams = {
   provider: parseAsArrayOf(parseAsStringEnum<ProviderApi>(Object.values(ProviderApi))).withDefault([]),
   clusterName: parseAsString.withDefault(''),
   accountName: parseAsString.withDefault(''),
-  archived: parseAsBoolean.withDefault(false),
+  showTerminated: parseAsBoolean.withDefault(false),
 };
 
 const Clusters: React.FunctionComponent = () => {
-  const location = useLocation();
-  const [{ status, provider, clusterName, accountName, archived }, setQuery] = useQueryStates(filterParams);
-
-  // React to URL changes
-  React.useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const newArchived = params.get('archived') === 'true';
-
-    if (archived !== newArchived) {
-      setQuery({
-        archived: newArchived,
-        status: null,
-        provider: [],
-      });
-    }
-  }, [location.search, archived, setQuery]);
+  const [{ status, provider, clusterName, accountName, showTerminated }, setQuery] = useQueryStates(filterParams);
 
   return (
     <React.Fragment>
       <PageSection variant={PageSectionVariants.light}>
         <TextContent>
-          <Text component="h1">Clusters {archived ? '- History' : '- Active'}</Text>
+          <Text component="h1">Clusters</Text>
         </TextContent>
       </PageSection>
       <PageSection variant={PageSectionVariants.light} isFilled>
@@ -53,14 +37,15 @@ const Clusters: React.FunctionComponent = () => {
             setStatusSelection={value => setQuery({ status: value })}
             providerSelections={provider}
             setProviderSelections={value => setQuery({ provider: value || [] })}
-            archived={archived}
+            showTerminated={showTerminated}
+            setShowTerminated={value => setQuery({ showTerminated: value })}
           />
           <ClustersTable
             clusterNameSearch={clusterName}
             accountNameSearch={accountName}
             statusFilter={status}
             providerSelections={provider}
-            archived={archived}
+            showTerminated={showTerminated}
           />
         </Panel>
       </PageSection>

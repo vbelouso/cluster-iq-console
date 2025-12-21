@@ -13,6 +13,7 @@ import {
   ToolbarGroup,
   ToolbarItem,
   ToolbarFilter,
+  Switch,
 } from '@patternfly/react-core';
 import { FilterIcon } from '@patternfly/react-icons';
 import React from 'react';
@@ -28,6 +29,8 @@ export const ServersTableToolbar: React.FunctionComponent<ServersTableToolbarPro
   setProviderSelections,
   providerSelections,
   statusSelection,
+  showTerminated,
+  setShowTerminated,
 }) => {
   const debouncedSearch = React.useMemo(() => debounce(setSearchValue, 300), [setSearchValue]);
 
@@ -417,6 +420,15 @@ export const ServersTableToolbar: React.FunctionComponent<ServersTableToolbarPro
             </ToolbarFilter>
           </ToolbarGroup>
         </ToolbarToggleGroup>
+        <ToolbarItem>
+          <Switch
+            id="show-terminated-instances"
+            label="Show terminated instances"
+            labelOff="Show terminated instances"
+            isChecked={showTerminated}
+            onChange={(_event, checked) => setShowTerminated(checked)}
+          />
+        </ToolbarItem>
       </ToolbarContent>
     </Toolbar>
   );

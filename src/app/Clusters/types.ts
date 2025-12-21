@@ -9,7 +9,8 @@ export interface ClustersTableToolbarProps {
   setStatusSelection: (value: ResourceStatusApi | null) => void;
   providerSelections: ProviderApi[] | null;
   setProviderSelections: (value: ProviderApi[] | null) => void;
-  archived: boolean;
+  showTerminated: boolean;
+  setShowTerminated: (value: boolean) => void;
 }
 
 export interface ClustersTableProps {
@@ -17,5 +18,5 @@ export interface ClustersTableProps {
   accountNameSearch: string;
   statusFilter: string | null;
   providerSelections: ProviderApi[] | null;
-  archived: boolean;
+  showTerminated: boolean;
 }
