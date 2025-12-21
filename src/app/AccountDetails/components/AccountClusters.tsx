@@ -21,13 +21,13 @@ export const AccountClusters: React.FunctionComponent = () => {
   const [clusters, setClusters] = useState<ClusterResponseApi[]>([]);
   const [showTerminated, setShowTerminated] = useState(false);
   const [loading, setLoading] = useState(true);
-  const { accountName } = useParams();
+  const { accountId } = useParams();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         debug('Fetching data...');
-        const { data } = await api.accounts.clustersList(accountName);
+        const { data } = await api.accounts.clustersList(accountId);
         debug('Fetched Account data:', data);
         setClusters(data.items || []);
       } catch (error) {
@@ -38,7 +38,7 @@ export const AccountClusters: React.FunctionComponent = () => {
     };
 
     fetchData();
-  }, [accountName]);
+  }, [accountId]);
 
   // Filter terminated clusters
   const displayClusters = showTerminated ? clusters : clusters.filter(cluster => cluster.status !== 'Terminated');

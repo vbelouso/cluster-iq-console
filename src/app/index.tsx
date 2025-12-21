@@ -31,7 +31,7 @@ const AppRoutes = (): React.ReactElement => (
     <Routes>
       <Route path="/" element={<Overview />} />
       <Route path="accounts" element={<Accounts />} />
-      <Route path="accounts/:accountName" element={<AccountDetails />} />
+      <Route path="accounts/:accountId" element={<AccountDetails />} />
       <Route path="clusters" element={<Clusters />} />
       <Route path="clusters/:clusterID" element={<ClusterDetails />} />
       <Route path="instances" element={<Servers />} />

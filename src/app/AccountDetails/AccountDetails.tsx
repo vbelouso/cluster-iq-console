@@ -9,14 +9,14 @@ import { debug } from '@app/utils/debugLogs';
 import { AccountClusters } from './components/AccountClusters';
 
 const AccountDetails: React.FunctionComponent = () => {
-  const { accountName } = useParams() as { accountName: string };
+  const { accountId } = useParams() as { accountId: string };
   const [accountData, setAccountData] = useState<AccountResponseApi | null>(null);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const fetchData = async () => {
       try {
-        debug('Fetching Account Clusters ', accountName);
-        const { data: fetchedAccount } = await api.accounts.accountsDetail(accountName);
+        debug('Fetching Account Clusters ', accountId);
+        const { data: fetchedAccount } = await api.accounts.accountsDetail(accountId);
         setAccountData(fetchedAccount);
         debug('Fetched Account Clusters data:', fetchedAccount);
       } catch (error) {
@@ -27,11 +27,11 @@ const AccountDetails: React.FunctionComponent = () => {
     };
 
     fetchData();
-  }, [accountName]);
+  }, [accountId]);
 
   return (
     <Page>
-      <AccountsHeader accountName={accountName} label="Account" />
+      <AccountsHeader accountName={accountData?.accountName || accountId} label="Account" />
       <AccountsTabs
         detailsTabContent={<AccountDetailsContent loading={loading} accountData={accountData} />}
         clustersTabContent={<AccountClusters />}
