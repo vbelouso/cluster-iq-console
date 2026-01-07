@@ -16,7 +16,7 @@
     "@patternfly/react-styles": "^5.4.1",
     "@patternfly/react-table": "^5.4.12",
     "@types/react": "^19.0.1",
-    "axios": "^1.8.2",
+    "axios": "^1.12.0",
     "date-fns": "^4.1.0",
     "lodash.debounce": "4.0.8",
     "luxon": "^3.5.0",
