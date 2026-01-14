@@ -8,6 +8,7 @@ import {
   TextInputGroup,
   TextInputGroupMain,
   TextInputGroupUtilities,
+  Tooltip,
 } from '@patternfly/react-core';
 import { ClusterResponseApi } from '@api';
 import TimesIcon from '@patternfly/react-icons/dist/esm/icons/times-icon';
@@ -81,16 +82,17 @@ export const ClusterTypeaheadSelect: React.FunctionComponent<ClusterTypeaheadSel
                 aria-label="Search clusters"
               />
               <TextInputGroupUtilities {...(!inputValue ? { style: { display: 'none' } } : {})}>
-                <Button
-                  variant="plain"
-                  onClick={() => {
-                    setInputValue('');
-                    onClearCluster();
-                  }}
-                  aria-label="Clear input value"
-                >
-                  <TimesIcon aria-hidden />
-                </Button>
+                <Tooltip content="Clear input value">
+                  <Button
+                    icon={<TimesIcon aria-hidden />}
+                    variant="plain"
+                    onClick={() => {
+                      setInputValue('');
+                      onClearCluster();
+                    }}
+                    aria-label="Clear input value"
+                  />
+                </Tooltip>
               </TextInputGroupUtilities>
             </TextInputGroup>
           </MenuToggle>
@@ -105,7 +107,12 @@ export const ClusterTypeaheadSelect: React.FunctionComponent<ClusterTypeaheadSel
             <SelectOption key={acc.clusterId} value={acc.clusterId}>
               <div>
                 <div>{acc.clusterName}</div>
-                <div style={{ fontSize: '0.85em', opacity: 0.8, fontFamily: 'monospace' }}>{acc.clusterId}</div>
+                <div
+                  className="pf-v6-u-font-size-sm pf-v6-u-font-family-mono"
+                  style={{ color: 'var(--pf-t--global--text--color--subtle)' }}
+                >
+                  {acc.clusterId}
+                </div>
               </div>
             </SelectOption>
           ))

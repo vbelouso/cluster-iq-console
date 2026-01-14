@@ -411,36 +411,36 @@ export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarP
           <ToolbarGroup variant="filter-group">
             <ToolbarItem>{attributeDropdown}</ToolbarItem>
             <ToolbarFilter
-              chips={clusterNameSearch !== '' ? [clusterNameSearch] : ([] as string[])}
-              deleteChip={() => setClusterNameSearch('')}
-              deleteChipGroup={() => setClusterNameSearch('')}
+              labels={clusterNameSearch !== '' ? [clusterNameSearch] : ([] as string[])}
+              deleteLabel={() => setClusterNameSearch('')}
+              deleteLabelGroup={() => setClusterNameSearch('')}
               categoryName="Cluster Name"
               showToolbarItem={activeAttributeMenu === 'Cluster Name'}
             >
               {clusterNameInput}
             </ToolbarFilter>
             <ToolbarFilter
-              chips={accountNameSearch !== '' ? [accountNameSearch] : ([] as string[])}
-              deleteChip={() => setAccountNameSearch('')}
-              deleteChipGroup={() => setAccountNameSearch('')}
+              labels={accountNameSearch !== '' ? [accountNameSearch] : ([] as string[])}
+              deleteLabel={() => setAccountNameSearch('')}
+              deleteLabelGroup={() => setAccountNameSearch('')}
               categoryName="Account Name"
               showToolbarItem={activeAttributeMenu === 'Account Name'}
             >
               {accountNameInput}
             </ToolbarFilter>
             <ToolbarFilter
-              chips={statusSelection ? [statusSelection] : []}
-              deleteChip={() => setStatusSelection(null)}
-              deleteChipGroup={() => setStatusSelection(null)}
+              labels={statusSelection ? [statusSelection] : []}
+              deleteLabel={() => setStatusSelection(null)}
+              deleteLabelGroup={() => setStatusSelection(null)}
               categoryName="Status"
               showToolbarItem={activeAttributeMenu === 'Status'}
             >
               {statusSelect}
             </ToolbarFilter>
             <ToolbarFilter
-              chips={providerSelections || []}
-              deleteChip={(_category, chip) => onProviderMenuSelect(undefined, chip as string)}
-              deleteChipGroup={() => setProviderSelections([])}
+              labels={providerSelections || []}
+              deleteLabel={(_category, chip) => onProviderMenuSelect(undefined, chip as string)}
+              deleteLabelGroup={() => setProviderSelections([])}
               categoryName="Provider"
               showToolbarItem={activeAttributeMenu === 'Provider'}
             >
@@ -452,7 +452,6 @@ export const ClustersTableToolbar: React.FunctionComponent<ClustersTableToolbarP
           <Switch
             id="show-terminated-clusters"
             label="Show terminated clusters"
-            labelOff="Show terminated clusters"
             isChecked={showTerminated}
             onChange={(_event, checked) => setShowTerminated(checked)}
           />

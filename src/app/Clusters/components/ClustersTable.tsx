@@ -8,7 +8,7 @@ import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
 import { TablePagination } from '@app/components/common/TablesPagination';
 import { searchItems, filterByStatus, filterByProvider, sortItems, paginateItems } from '@app/utils/tableFilters';
 import { fetchAllPages } from '@app/utils/fetchAllPages';
-import { EmptyState, EmptyStateVariant, EmptyStateBody, EmptyStateIcon, Title } from '@patternfly/react-core';
+import { EmptyState, EmptyStateVariant, EmptyStateBody, Title } from '@patternfly/react-core';
 import { CubesIcon } from '@patternfly/react-icons';
 
 export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
@@ -107,11 +107,15 @@ export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
 
   if (processed.length === 0) {
     return (
-      <EmptyState variant={EmptyStateVariant.sm}>
-        <EmptyStateIcon icon={CubesIcon} />
-        <Title headingLevel="h4" size="md">
-          No clusters found
-        </Title>
+      <EmptyState
+        titleText={
+          <Title headingLevel="h4" size="md">
+            No clusters found
+          </Title>
+        }
+        icon={CubesIcon}
+        variant={EmptyStateVariant.sm}
+      >
         <EmptyStateBody>
           {!showTerminated ? (
             <>

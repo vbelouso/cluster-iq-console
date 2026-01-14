@@ -6,7 +6,6 @@ import {
   ToolbarItem,
   Switch,
   EmptyState,
-  EmptyStateIcon,
   Title,
   EmptyStateBody,
   EmptyStateVariant,
@@ -59,7 +58,6 @@ export const AccountClusters: React.FunctionComponent = () => {
             <Switch
               id="show-terminated-clusters"
               label="Show terminated clusters"
-              labelOff="Show terminated clusters"
               isChecked={showTerminated}
               onChange={handleToggleChange}
             />
@@ -68,11 +66,15 @@ export const AccountClusters: React.FunctionComponent = () => {
       </Toolbar>
 
       {displayClusters.length === 0 ? (
-        <EmptyState variant={EmptyStateVariant.sm}>
-          <EmptyStateIcon icon={CubesIcon} />
-          <Title headingLevel="h4" size="md">
-            No clusters found
-          </Title>
+        <EmptyState
+          titleText={
+            <Title headingLevel="h4" size="md">
+              No clusters found
+            </Title>
+          }
+          icon={CubesIcon}
+          variant={EmptyStateVariant.sm}
+        >
           <EmptyStateBody>
             {!showTerminated ? (
               <>

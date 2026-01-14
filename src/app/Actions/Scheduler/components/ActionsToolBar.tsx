@@ -677,45 +677,45 @@ export const ScheduleActionsTableToolbar: React.FunctionComponent<SchedulerTable
           <ToolbarGroup variant="filter-group">
             <ToolbarItem>{attributeDropdown}</ToolbarItem>
             <ToolbarFilter
-              chips={searchValue !== '' ? [searchValue] : []}
-              deleteChip={() => setSearchValue('')}
-              deleteChipGroup={() => setSearchValue('')}
+              labels={searchValue !== '' ? [searchValue] : []}
+              deleteLabel={() => setSearchValue('')}
+              deleteLabelGroup={() => setSearchValue('')}
               categoryName="Account"
               showToolbarItem={activeAttributeMenu === 'Account'}
             >
               {searchInput}
             </ToolbarFilter>
             <ToolbarFilter
-              chips={actionOperation || []}
-              deleteChip={(_category, chip) => onActionMenuSelect(undefined, chip as string)}
-              deleteChipGroup={() => setOperation([])}
+              labels={actionOperation || []}
+              deleteLabel={(_category, chip) => onActionMenuSelect(undefined, chip as string)}
+              deleteLabelGroup={() => setOperation([])}
               categoryName="Action"
               showToolbarItem={activeAttributeMenu === 'Action'}
             >
               {actionSelect}
             </ToolbarFilter>
             <ToolbarFilter
-              chips={actionType ? [actionTypeLabel(actionType)] : []}
-              deleteChip={() => setType(null)}
-              deleteChipGroup={() => setType(null)}
+              labels={actionType ? [actionTypeLabel(actionType)] : []}
+              deleteLabel={() => setType(null)}
+              deleteLabelGroup={() => setType(null)}
               categoryName="Type"
               showToolbarItem={activeAttributeMenu === 'Type'}
             >
               {typeSelect}
             </ToolbarFilter>
             <ToolbarFilter
-              chips={actionStatus ? [actionStatus] : []}
-              deleteChip={() => setStatus(null)}
-              deleteChipGroup={() => setStatus(null)}
+              labels={actionStatus ? [actionStatus] : []}
+              deleteLabel={() => setStatus(null)}
+              deleteLabelGroup={() => setStatus(null)}
               categoryName="Status"
               showToolbarItem={activeAttributeMenu === 'Status'}
             >
               {statusSelect}
             </ToolbarFilter>
             <ToolbarFilter
-              chips={actionEnabled !== null ? [actionEnabled === true ? 'Enabled' : 'Disabled'] : []}
-              deleteChip={() => setEnabled(null)}
-              deleteChipGroup={() => setEnabled(null)}
+              labels={actionEnabled !== null ? [actionEnabled === true ? 'Enabled' : 'Disabled'] : []}
+              deleteLabel={() => setEnabled(null)}
+              deleteLabelGroup={() => setEnabled(null)}
               categoryName="Enabled"
               showToolbarItem={activeAttributeMenu === 'Enabled'}
             >

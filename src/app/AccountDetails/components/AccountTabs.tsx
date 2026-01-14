@@ -1,12 +1,4 @@
-import {
-  PageSection,
-  PageSectionVariants,
-  Tab,
-  TabContent,
-  TabContentBody,
-  Tabs,
-  TabTitleText,
-} from '@patternfly/react-core';
+import { PageSection, Tab, TabContent, TabContentBody, Tabs, TabTitleText } from '@patternfly/react-core';
 import React from 'react';
 import { AccountsTabsProps } from './types';
 
@@ -18,13 +10,13 @@ export const AccountsTabs: React.FunctionComponent<AccountsTabsProps> = ({ detai
 
   return (
     <>
-      <PageSection type="tabs" variant={PageSectionVariants.light}>
+      <PageSection hasBodyWrapper={false} type="tabs">
         <Tabs activeKey={activeTabKey} onSelect={handleTabClick} usePageInsets id="open-tabs-example-tabs-list">
           <Tab eventKey={0} title={<TabTitleText>Details</TabTitleText>} tabContentId={`tabContent${0}`} />
           <Tab eventKey={1} title={<TabTitleText>Clusters</TabTitleText>} tabContentId={`tabContent${1}`} />
         </Tabs>
       </PageSection>
-      <PageSection variant={PageSectionVariants.light}>
+      <PageSection hasBodyWrapper={false} isFilled>
         <TabContent key={0} eventKey={0} id={`tabContent${0}`} activeKey={activeTabKey} hidden={0 !== activeTabKey}>
           <TabContentBody>{detailsTabContent}</TabContentBody>
         </TabContent>

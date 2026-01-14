@@ -1,10 +1,10 @@
-import { Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
+import { ThProps, Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { api, AccountResponseApi, ProviderApi } from '@api';
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
 import { TablePagination } from '@app/components/common/TablesPagination';
-import { searchItems, filterByProvider, paginateItems } from '@app/utils/tableFilters';
+import { searchItems, filterByProvider, sortItems, paginateItems } from '@app/utils/tableFilters';
 import { fetchAllPages } from '@app/utils/fetchAllPages';
 
 export const AccountsTable: React.FunctionComponent<{
@@ -15,6 +15,9 @@ export const AccountsTable: React.FunctionComponent<{
   const [perPage, setPerPage] = useState(20);
   const [allAccounts, setAllAccounts] = useState<AccountResponseApi[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [activeSortIndex, setActiveSortIndex] = useState<number | undefined>(0);
+  const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,7 +41,25 @@ export const AccountsTable: React.FunctionComponent<{
   filtered = searchItems(filtered, searchValue, ['accountName']);
   filtered = filterByProvider(filtered, providerSelections);
 
+  if (activeSortIndex !== undefined && activeSortDirection) {
+    const sortFields: (keyof AccountResponseApi)[] = ['accountName', 'provider', 'clusterCount'];
+    filtered = sortItems(filtered, sortFields[activeSortIndex], activeSortDirection);
+  }
+
   const paginated = paginateItems(filtered, page, perPage);
+
+  const getSortParams = (columnIndex: number): ThProps['sort'] => ({
+    sortBy: {
+      index: activeSortIndex,
+      direction: activeSortDirection,
+      defaultDirection: 'asc',
+    },
+    onSort: (_event, index, direction) => {
+      setActiveSortIndex(index);
+      setActiveSortDirection(direction);
+    },
+    columnIndex,
+  });
 
   const columnNames = {
     name: 'Name',
@@ -54,9 +75,9 @@ export const AccountsTable: React.FunctionComponent<{
         <Table aria-label="Accounts table">
           <Thead>
             <Tr>
-              <Th>{columnNames.name}</Th>
-              <Th>{columnNames.cloudProvider}</Th>
-              <Th>{columnNames.clusterCount}</Th>
+              <Th sort={getSortParams(0)}>{columnNames.name}</Th>
+              <Th sort={getSortParams(1)}>{columnNames.cloudProvider}</Th>
+              <Th sort={getSortParams(2)}>{columnNames.clusterCount}</Th>
             </Tr>
           </Thead>
           <Tbody>

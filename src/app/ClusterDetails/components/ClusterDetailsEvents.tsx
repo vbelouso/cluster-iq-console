@@ -6,7 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { getResultIcon } from '@app/utils/renderUtils';
 import { useTableSort } from '@app/hooks/useTableSort.tsx';
-import { EmptyState, EmptyStateHeader, EmptyStateIcon } from '@patternfly/react-core';
+import { EmptyState } from '@patternfly/react-core';
 import { SearchIcon } from '@patternfly/react-icons';
 
 interface TableEventsProps {
@@ -24,9 +24,7 @@ const columnNames = {
 };
 
 export const EmptyStateNoFound: React.FunctionComponent = () => (
-  <EmptyState>
-    <EmptyStateHeader titleText="No events" headingLevel="h4" icon={<EmptyStateIcon icon={SearchIcon} />} />
-  </EmptyState>
+  <EmptyState headingLevel="h4" icon={SearchIcon} titleText="No events"></EmptyState>
 );
 
 const TableEvents: React.FunctionComponent<TableEventsProps> = ({ data, getSortParams }) => {

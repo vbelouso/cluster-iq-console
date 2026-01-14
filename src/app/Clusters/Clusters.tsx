@@ -1,4 +1,4 @@
-import { PageSection, PageSectionVariants, Panel, TextContent, Text } from '@patternfly/react-core';
+import { PageSection, Panel, Content } from '@patternfly/react-core';
 import React from 'react';
 import ClustersTable from './components/ClustersTable';
 import ClustersTableToolbar from './components/ClustersTableToolbar';
@@ -21,12 +21,12 @@ const Clusters: React.FunctionComponent = () => {
 
   return (
     <React.Fragment>
-      <PageSection variant={PageSectionVariants.light}>
-        <TextContent>
-          <Text component="h1">Clusters</Text>
-        </TextContent>
+      <PageSection hasBodyWrapper={false}>
+        <Content>
+          <Content component="h1">Clusters</Content>
+        </Content>
       </PageSection>
-      <PageSection variant={PageSectionVariants.light} isFilled>
+      <PageSection hasBodyWrapper={false} isFilled>
         <Panel>
           <ClustersTableToolbar
             clusterNameSearch={clusterName}

@@ -8,6 +8,7 @@ import {
   TextInputGroup,
   TextInputGroupMain,
   TextInputGroupUtilities,
+  Tooltip,
 } from '@patternfly/react-core';
 import { AccountResponseApi } from '@api';
 import TimesIcon from '@patternfly/react-icons/dist/esm/icons/times-icon';
@@ -79,16 +80,17 @@ export const AccountTypeaheadSelect: React.FunctionComponent<AccountTypeaheadSel
                 aria-label="Search accounts"
               />
               <TextInputGroupUtilities {...(!inputValue ? { style: { display: 'none' } } : {})}>
-                <Button
-                  variant="plain"
-                  onClick={() => {
-                    setInputValue('');
-                    onClearAccount();
-                  }}
-                  aria-label="Clear input value"
-                >
-                  <TimesIcon aria-hidden />
-                </Button>
+                <Tooltip content="Clear input value">
+                  <Button
+                    icon={<TimesIcon aria-hidden />}
+                    variant="plain"
+                    onClick={() => {
+                      setInputValue('');
+                      onClearAccount();
+                    }}
+                    aria-label="Clear input value"
+                  />
+                </Tooltip>
               </TextInputGroupUtilities>
             </TextInputGroup>
           </MenuToggle>
@@ -103,7 +105,12 @@ export const AccountTypeaheadSelect: React.FunctionComponent<AccountTypeaheadSel
             <SelectOption key={acc.accountId} value={acc.accountId}>
               <div>
                 <div>{acc.accountName}</div>
-                <div style={{ fontSize: '0.85em', opacity: 0.8, fontFamily: 'monospace' }}>{acc.accountId}</div>
+                <div
+                  className="pf-v6-u-font-size-sm pf-v6-u-font-family-mono"
+                  style={{ color: 'var(--pf-t--global--text--color--subtle)' }}
+                >
+                  {acc.accountId}
+                </div>
               </div>
             </SelectOption>
           ))

@@ -4,6 +4,7 @@ import {
   Masthead,
   MastheadToggle,
   MastheadMain,
+  MastheadLogo,
   MastheadBrand,
   MastheadContent,
   PageSidebar,
@@ -17,12 +18,14 @@ import {
   MenuToggle,
   ToolbarGroup,
   DropdownList,
+  Tooltip,
 } from '@patternfly/react-core';
-import BarsIcon from '@patternfly/react-icons/dist/esm/icons/bars-icon';
-import { QuestionCircleIcon, RedhatIcon, ExternalLinkAltIcon } from '@patternfly/react-icons';
+
+import { QuestionCircleIcon, ExternalLinkAltIcon, MoonIcon, SunIcon } from '@patternfly/react-icons';
+import logoImg from '../../assets/favicon.png';
 import SidebarNavigation from './SidebarNavigation';
 import { useUser } from '../Contexts/UserContext';
-import { NavLink } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import AboutModalComponent from './AboutModal';
 import { REPOSITORY_URL } from '@app/constants';
 interface IAppLayout {
@@ -37,6 +40,13 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
   const [isHelpMenuOpen, setIsHelpMenuOpen] = React.useState(false);
   const [isAboutModalOpen, setIsAboutModalOpen] = React.useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = React.useState(false);
+  const [isDarkTheme, setIsDarkTheme] = React.useState(() => {
+    const saved = localStorage.getItem('theme');
+    if (saved) return saved === 'dark';
+
+    // Fallback to browser preference
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
   const isDesktop = () => window.innerWidth >= PF_BREAKPOINT_XL;
   const previousDesktopState = React.useRef(isDesktop());
 
@@ -57,7 +67,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
       <>
         {link.label}
         {link.isExternal && (
-          <span style={{ marginLeft: 'var(--pf-v5-global--spacer--sm)', verticalAlign: 'middle' }}>
+          <span style={{ marginLeft: 'var(--pf-t--global--spacer--sm)', verticalAlign: 'middle' }}>
             {' '}
             <ExternalLinkAltIcon />
           </span>
@@ -114,10 +124,37 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
     };
   }, [onResize]);
 
+  React.useEffect(() => {
+    const htmlElement = document.documentElement;
+    if (isDarkTheme) {
+      htmlElement.classList.add('pf-v6-theme-dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      htmlElement.classList.remove('pf-v6-theme-dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDarkTheme]);
+
+  React.useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => {
+      const saved = localStorage.getItem('theme');
+      if (!saved) {
+        setIsDarkTheme(e.matches);
+      }
+    };
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
+  const toggleTheme = () => {
+    setIsDarkTheme(prev => !prev);
+  };
+
   const headerToolbar = (
-    <Toolbar id="toolbar" isFullHeight isStatic style={{ width: '100%' }}>
-      <ToolbarContent style={{ width: '100%' }}>
-        <ToolbarGroup align={{ default: 'alignRight' }} spaceItems={{ default: 'spaceItemsMd' }}>
+    <Toolbar id="toolbar" isFullHeight isStatic className="pf-v6-u-w-100">
+      <ToolbarContent className="pf-v6-u-w-100">
+        <ToolbarGroup align={{ default: 'alignEnd' }}>
           <ToolbarItem>
             <Dropdown
               isOpen={isHelpMenuOpen}
@@ -127,19 +164,32 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                 position: 'right',
               }}
               toggle={toggleRef => (
-                <MenuToggle
-                  ref={toggleRef}
-                  aria-label="Help dropdown"
-                  variant="plain"
-                  onClick={() => setIsHelpMenuOpen(!isHelpMenuOpen)}
-                  isExpanded={isHelpMenuOpen}
-                >
-                  <QuestionCircleIcon />
-                </MenuToggle>
+                <Tooltip content="Help">
+                  <MenuToggle
+                    ref={toggleRef}
+                    aria-label="Help dropdown"
+                    variant="plain"
+                    onClick={() => setIsHelpMenuOpen(!isHelpMenuOpen)}
+                    isExpanded={isHelpMenuOpen}
+                  >
+                    <QuestionCircleIcon />
+                  </MenuToggle>
+                </Tooltip>
               )}
             >
               <DropdownList>{helpDropdownItems}</DropdownList>
             </Dropdown>
+          </ToolbarItem>
+          <ToolbarItem>
+            <Tooltip content={isDarkTheme ? 'Switch to light theme' : 'Switch to dark theme'}>
+              <MenuToggle
+                variant="plain"
+                onClick={toggleTheme}
+                aria-label={isDarkTheme ? 'Switch to light theme' : 'Switch to dark theme'}
+              >
+                {isDarkTheme ? <SunIcon /> : <MoonIcon />}
+              </MenuToggle>
+            </Tooltip>
           </ToolbarItem>
           <ToolbarItem>
             <Dropdown
@@ -152,11 +202,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
                   aria-label="User menu"
                   variant="plainText"
                   onClick={onUserDropdownToggle}
-                  style={{
-                    color: 'white',
-                    padding: '0 24px',
-                    fontWeight: 'normal',
-                  }}
+                  className="pf-v6-u-px-lg pf-v6-u-font-weight-normal"
                 >
                   {userEmail || 'User'}
                 </MenuToggle>
@@ -172,26 +218,38 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
 
   const header = (
     <Masthead>
-      <MastheadToggle>
-        <PageToggleButton
-          variant="plain"
-          aria-label="Global navigation"
-          isSidebarOpen={isSidebarOpen}
-          onSidebarToggle={onSidebarToggle}
-          id="vertical-nav-toggle"
-        >
-          <BarsIcon />
-        </PageToggleButton>
-      </MastheadToggle>
       <MastheadMain>
-        <RedhatIcon style={{ color: 'red', fontSize: '2.8em' }} />
-        <MastheadBrand style={{ marginLeft: '10px', color: 'white', fontSize: '2em' }}>
-          <NavLink to="/" style={{ color: 'white', textDecoration: 'none' }}>
-            ClusterIQ
-          </NavLink>
+        <MastheadToggle>
+          <Tooltip content="Global navigation">
+            <PageToggleButton
+              isHamburgerButton
+              variant="plain"
+              aria-label="Global navigation"
+              isSidebarOpen={isSidebarOpen}
+              onSidebarToggle={onSidebarToggle}
+              id="vertical-nav-toggle"
+            ></PageToggleButton>
+          </Tooltip>
+        </MastheadToggle>
+        <MastheadBrand>
+          <MastheadLogo
+            component={props => <Link {...props} to="/" style={{ textDecoration: 'none', color: 'inherit' }} />}
+          >
+            <img src={logoImg} alt="ClusterIQ" style={{ height: '36px' }} />
+            <span
+              style={{
+                marginLeft: 'var(--pf-t--global--spacer--sm)',
+                fontSize: '1.5rem',
+                fontWeight: 'normal',
+                verticalAlign: 'middle',
+              }}
+            >
+              ClusterIQ
+            </span>
+          </MastheadLogo>
         </MastheadBrand>
       </MastheadMain>
-      <MastheadContent style={{ width: '100%' }}>{headerToolbar}</MastheadContent>
+      <MastheadContent className="pf-v6-u-w-100">{headerToolbar}</MastheadContent>
     </Masthead>
   );
 
@@ -207,7 +265,7 @@ const AppLayout: React.FunctionComponent<IAppLayout> = ({ children }) => {
 
   return (
     <>
-      <Page header={header} sidebar={sidebar} mainContainerId={pageId}>
+      <Page masthead={header} sidebar={sidebar} mainContainerId={pageId}>
         {children}
       </Page>
       <AboutModalComponent isOpen={isAboutModalOpen} onClose={() => setIsAboutModalOpen(false)}></AboutModalComponent>

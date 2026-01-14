@@ -14,10 +14,10 @@ import {
 import { ResourceStatusApi, ProviderApi } from '@api';
 
 const PATTERNFLY_COLORS = {
-  success: 'var(--pf-v5-global--success-color--100)',
-  danger: 'var(--pf-v5-global--danger-color--100)',
-  warning: 'var(--pf-v5-global--warning-color--100)',
-  disabled: 'var(--pf-v5-global--disabled-color--100)',
+  success: 'var(--pf-t--global--color--status--success--default)',
+  danger: 'var(--pf-t--global--color--status--danger--default)',
+  warning: 'var(--pf-t--global--color--status--warning--default)',
+  disabled: 'var(--pf-t--global--text--color--disabled)',
 } as const;
 
 const CLUSTER_ICON = <OpenshiftIcon color={PATTERNFLY_COLORS.danger} />;

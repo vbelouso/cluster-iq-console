@@ -1,4 +1,4 @@
-import { AboutModal, TextContent, TextList, TextListItem } from '@patternfly/react-core';
+import { AboutModal, Content } from '@patternfly/react-core';
 import React from 'react';
 import brandImg from '../../assets/favicon.png';
 import modalBackground from '../../assets/modal_background.png';
@@ -19,22 +19,22 @@ const AboutModalComponent: React.FunctionComponent<AboutModalComponentProps> = (
       brandImageSrc={brandImg}
       backgroundImageSrc={modalBackground}
     >
-      <TextContent>
-        <TextList component="dl">
-          <TextListItem component="dt">Version</TextListItem>
-          <TextListItem component="dd">{APP_VERSION}</TextListItem>
+      <Content>
+        <Content component="dl">
+          <Content component="dt">Version</Content>
+          <Content component="dd">{APP_VERSION}</Content>
 
-          <TextListItem component="dt">Maintainer</TextListItem>
-          <TextListItem component="dd">{MAINTAINER_NAME}</TextListItem>
+          <Content component="dt">Maintainer</Content>
+          <Content component="dd">{MAINTAINER_NAME}</Content>
 
-          <TextListItem component="dt">Repository</TextListItem>
-          <TextListItem component="dd">
+          <Content component="dt">Repository</Content>
+          <Content component="dd">
             <a href={REPOSITORY_URL} target="_blank" rel="noopener noreferrer">
               GitHub
             </a>
-          </TextListItem>
-        </TextList>
-      </TextContent>
+          </Content>
+        </Content>
+      </Content>
     </AboutModal>
   );
 };

@@ -1,10 +1,10 @@
-import { Flex, FlexItem, Label, PageSection, PageSectionVariants, Title } from '@patternfly/react-core';
+import { Flex, FlexItem, Label, PageSection, Title } from '@patternfly/react-core';
 import { AccountsHeaderProps } from './types';
 import React from 'react';
 
 export const AccountsHeader: React.FunctionComponent<AccountsHeaderProps> = ({ accountName, label }) => {
   return (
-    <PageSection variant={PageSectionVariants.light}>
+    <PageSection hasBodyWrapper={false}>
       <Flex
         spaceItems={{ default: 'spaceItemsMd' }}
         alignItems={{ default: 'alignItemsFlexStart' }}

@@ -86,7 +86,7 @@ const DateTimePicker: React.FunctionComponent<DateTimePickerProps> = ({ onChange
   const [selectedTimeZone, setSelectedTimeZone] = useState('UTC');
 
   // Handle date selection
-  const onDateChange = (_event: React.FormEvent<HTMLInputElement>, value: string, date?: Date) => {
+  const onDateChange = (_event: React.FormEvent<HTMLInputElement>, _value: string, date?: Date) => {
     if (date) {
       setSelectedDate(date);
       updateDateTime(date, selectedTimeZone);
@@ -94,7 +94,7 @@ const DateTimePicker: React.FunctionComponent<DateTimePickerProps> = ({ onChange
   };
 
   // Handle time selection
-  const onTimeChange = (_event: React.FormEvent<HTMLInputElement>, time: string, hour?: number, minute?: number) => {
+  const onTimeChange = (_event: React.FormEvent<HTMLInputElement>, _time: string, hour?: number, minute?: number) => {
     if (selectedDate && hour !== undefined && minute !== undefined) {
       const updatedDate = new Date(selectedDate);
       updatedDate.setHours(hour, minute);
@@ -141,16 +141,16 @@ const DateTimePicker: React.FunctionComponent<DateTimePickerProps> = ({ onChange
             is24Hour
             onChange={onTimeChange}
             menuAppendTo={document.body}
-            style={{ zIndex: 9999, width: '120px' }}
+            style={{ width: '140px', zIndex: 9999 }}
           />
         </InputGroupItem>
         <InputGroupItem>
           <Popover
             position="bottom"
             bodyContent={
-              <div style={{ padding: '8px', maxHeight: '200px', overflowY: 'auto' }}>
+              <div className="pf-v6-u-p-sm" style={{ maxHeight: '200px', overflowY: 'auto' }}>
                 {timeZones.map(zone => (
-                  <div key={zone} onClick={onSelectTimeZone} style={{ cursor: 'pointer', padding: '8px' }}>
+                  <div key={zone} onClick={onSelectTimeZone} className="pf-v6-u-p-sm" style={{ cursor: 'pointer' }}>
                     {zone}
                   </div>
                 ))}
@@ -163,8 +163,13 @@ const DateTimePicker: React.FunctionComponent<DateTimePickerProps> = ({ onChange
             appendTo={document.body}
             zIndex={9999}
           >
-            <Button variant="control" aria-label="Toggle timezone" onClick={() => setIsTimeZoneOpen(!isTimeZoneOpen)}>
-              <GlobeAmericasIcon /> {selectedTimeZone}
+            <Button
+              icon={<GlobeAmericasIcon />}
+              variant="control"
+              aria-label="Toggle timezone"
+              onClick={() => setIsTimeZoneOpen(!isTimeZoneOpen)}
+            >
+              {selectedTimeZone}
             </Button>
           </Popover>
         </InputGroupItem>

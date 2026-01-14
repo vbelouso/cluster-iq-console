@@ -8,10 +8,15 @@ import {
   Grid,
   GridItem,
   PageSection,
-  PageSectionVariants,
-  TextContent,
-  Text,
+  Content,
+  Alert,
+  Button,
+  EmptyState,
+  EmptyStateBody,
+  EmptyStateFooter,
+  EmptyStateActions,
 } from '@patternfly/react-core';
+import { CubesIcon } from '@patternfly/react-icons';
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
 import { generateCards } from './components/CardData';
 import { ProviderApi } from '@api';
@@ -21,11 +26,28 @@ import { useEventsData } from './hooks/useEventsData';
 import { DashboardState } from './types';
 
 const AggregateStatusCards: React.FunctionComponent = () => {
-  const { inventoryData } = useDashboardData();
+  const { inventoryData, loading, error } = useDashboardData();
   const { events, loading: eventsLoading, error: eventsError } = useEventsData();
 
-  if (!inventoryData) {
+  if (loading) {
     return <LoadingSpinner />;
+  }
+
+  if (error || !inventoryData) {
+    return (
+      <PageSection hasBodyWrapper={false}>
+        <EmptyState variant="lg" titleText="Unable to load dashboard" headingLevel="h1" icon={CubesIcon}>
+          <EmptyStateBody>Dashboard unavailable. Refresh to try again.</EmptyStateBody>
+          <EmptyStateFooter>
+            <EmptyStateActions>
+              <Button variant="primary" onClick={() => window.location.reload()}>
+                Refresh page
+              </Button>
+            </EmptyStateActions>
+          </EmptyStateFooter>
+        </EmptyState>
+      </PageSection>
+    );
   }
 
   const dashboardState: DashboardState = {
@@ -59,28 +81,27 @@ const AggregateStatusCards: React.FunctionComponent = () => {
 
   return (
     <React.Fragment>
-      <PageSection variant={PageSectionVariants.light}>
-        <TextContent>
-          <Text component="h1">Overview</Text>
-        </TextContent>
+      <PageSection hasBodyWrapper={false}>
+        <Content>
+          <Content component="h1">Overview</Content>
+        </Content>
       </PageSection>
-      <PageSection>
+      <PageSection hasBodyWrapper={false}>
         <Grid hasGutter>
           {Object.entries(cardData).map(([groupName, cards], groupIndex) => (
             <GridItem key={groupIndex} span={groupName === 'activityCards' ? 12 : undefined}>
               {groupName === 'activityCards' ? (
                 // Full width Activity card with double height
-                <Card style={{ minHeight: '500px' }} component="div">
-                  <CardTitle style={{ textAlign: 'center' }}>{cards[0].title}</CardTitle>
-                  <CardBody style={{ minHeight: '450px', padding: '1rem' }}>
+                <Card className="pf-v6-u-min-height" component="div">
+                  <CardTitle className="pf-v6-u-text-align-center">{cards[0].title}</CardTitle>
+                  <CardBody className="pf-v6-u-p-md">
                     {eventsLoading ? (
                       <LoadingSpinner />
                     ) : eventsError ? (
-                      <div style={{ color: 'red' }}>
-                        Error: {eventsError}
-                        <br />
-                        <small>Check console for details</small>
-                      </div>
+                      <Alert variant="danger" title="Unable to load events" isInline>
+                        <p>{eventsError}</p>
+                        <p>Check the console for more details or try refreshing the page.</p>
+                      </Alert>
                     ) : cards[0].customComponent ? (
                       cards[0].customComponent
                     ) : (
@@ -94,13 +115,18 @@ const AggregateStatusCards: React.FunctionComponent = () => {
                   hasGutter
                   style={
                     {
-                      '--pf-v5-l-gallery--GridTemplateColumns--min': '30%',
+                      '--pf-v6-l-gallery--GridTemplateColumns--min': '30%',
                     } as any
                   }
                 >
                   {cards.map((card, cardIndex) => (
-                    <Card style={{ textAlign: 'center' }} key={`${groupIndex}${cardIndex}`} component="div">
-                      <CardTitle>{card.title}</CardTitle>
+                    <Card key={`${groupIndex}${cardIndex}`} component="div" className="pf-v6-u-min-height">
+                      <CardTitle
+                        className="pf-v6-u-text-align-center"
+                        style={{ textAlign: 'center', justifyContent: 'center' }}
+                      >
+                        {card.title}
+                      </CardTitle>
                       <CardBody>{renderContent(card.content, card.layout, card.totalCount)}</CardBody>
                     </Card>
                   ))}

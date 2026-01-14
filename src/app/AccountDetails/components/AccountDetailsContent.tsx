@@ -15,7 +15,7 @@ export const AccountDetailsContent: React.FunctionComponent<AccountDetailsConten
       ) : accountData ? (
         <Flex direction={{ default: 'column' }}>
           <FlexItem spacer={{ default: 'spacerLg' }}>
-            <Title headingLevel="h2" size="lg" className="pf-v5-u-mt-sm" id="open-tabs-example-tabs-list-details-title">
+            <Title headingLevel="h2" size="lg" className="pf-v6-u-mt-sm" id="open-tabs-example-tabs-list-details-title">
               Account details
             </Title>
           </FlexItem>

@@ -1,12 +1,12 @@
 import { renderStatusLabel } from '@app/utils/renderUtils';
-import { EmptyState, EmptyStateVariant, EmptyStateBody, EmptyStateIcon, Title } from '@patternfly/react-core';
-import { Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
+import { EmptyState, EmptyStateVariant, EmptyStateBody, Title } from '@patternfly/react-core';
+import { ThProps, Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ServersTableProps } from '../types';
 import { api, InstanceResponseApi } from '@api';
 import { TablePagination } from '@app/components/common/TablesPagination';
-import { searchItems, filterByStatus, filterByProvider, paginateItems } from '@app/utils/tableFilters';
+import { searchItems, filterByStatus, filterByProvider, sortItems, paginateItems } from '@app/utils/tableFilters';
 import { fetchAllPages } from '@app/utils/fetchAllPages';
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
 import { ServerIcon } from '@patternfly/react-icons';
@@ -21,6 +21,9 @@ export const ServersTable: React.FunctionComponent<ServersTableProps> = ({
   const [perPage, setPerPage] = useState(10);
   const [allInstances, setAllInstances] = useState<InstanceResponseApi[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [activeSortIndex, setActiveSortIndex] = useState<number | undefined>(1);
+  const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,7 +54,35 @@ export const ServersTable: React.FunctionComponent<ServersTableProps> = ({
   filtered = filterByStatus(filtered, statusSelection);
   filtered = filterByProvider(filtered, providerSelections);
 
+  if (activeSortIndex !== undefined && activeSortDirection) {
+    const sortFields: (keyof InstanceResponseApi)[] = [
+      'instanceId',
+      'instanceName',
+      'status', // placeholder for index 2, though not sortable
+      'provider',
+      'availabilityZone',
+      'instanceType',
+    ];
+    // status column (index 2) is not sortable, so we only sort if index is not 2
+    if (activeSortIndex !== 2) {
+      filtered = sortItems(filtered, sortFields[activeSortIndex], activeSortDirection);
+    }
+  }
+
   const paginated = paginateItems(filtered, page, perPage);
+
+  const getSortParams = (columnIndex: number): ThProps['sort'] => ({
+    sortBy: {
+      index: activeSortIndex,
+      direction: activeSortDirection,
+      defaultDirection: 'asc',
+    },
+    onSort: (_event, index, direction) => {
+      setActiveSortIndex(index);
+      setActiveSortDirection(direction);
+    },
+    columnIndex,
+  });
 
   const columnNames = {
     id: 'ID',
@@ -68,11 +99,15 @@ export const ServersTable: React.FunctionComponent<ServersTableProps> = ({
 
   if (filtered.length === 0) {
     return (
-      <EmptyState variant={EmptyStateVariant.sm}>
-        <EmptyStateIcon icon={ServerIcon} />
-        <Title headingLevel="h4" size="md">
-          No instances found
-        </Title>
+      <EmptyState
+        titleText={
+          <Title headingLevel="h4" size="md">
+            No instances found
+          </Title>
+        }
+        icon={ServerIcon}
+        variant={EmptyStateVariant.sm}
+      >
         <EmptyStateBody>
           {!showTerminated ? (
             <>
@@ -93,12 +128,12 @@ export const ServersTable: React.FunctionComponent<ServersTableProps> = ({
       <Table aria-label="Servers table">
         <Thead>
           <Tr>
-            <Th>{columnNames.id}</Th>
-            <Th>{columnNames.name}</Th>
+            <Th sort={getSortParams(0)}>{columnNames.id}</Th>
+            <Th sort={getSortParams(1)}>{columnNames.name}</Th>
             <Th>{columnNames.status}</Th>
-            <Th>{columnNames.provider}</Th>
-            <Th>{columnNames.availabilityZone}</Th>
-            <Th>{columnNames.instanceType}</Th>
+            <Th sort={getSortParams(3)}>{columnNames.provider}</Th>
+            <Th sort={getSortParams(4)}>{columnNames.availabilityZone}</Th>
+            <Th sort={getSortParams(5)}>{columnNames.instanceType}</Th>
           </Tr>
         </Thead>
         <Tbody>

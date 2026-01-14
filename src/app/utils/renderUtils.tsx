@@ -20,7 +20,7 @@ export function renderActionStatusLabel(labelText: string | null | undefined) {
     case ActionStatus.Failed:
       return <Label color="red">{labelText}</Label>;
     case ActionStatus.Pending:
-      return <Label color="gold">{labelText}</Label>;
+      return <Label color="yellow">{labelText}</Label>;
     default:
       return <Label color="grey">{labelText}</Label>;
   }
@@ -55,7 +55,7 @@ export function renderActionTypeLabel(labelText: string | null | undefined) {
 export function renderOperationLabel(labelText: string | null | undefined) {
   switch (labelText) {
     case ActionOperations.POWER_ON:
-      return <Label color="cyan">{labelText}</Label>;
+      return <Label color="teal">{labelText}</Label>;
     case ActionOperations.POWER_OFF:
       return <Label color="purple">{labelText}</Label>;
     default:
@@ -66,11 +66,17 @@ export function renderOperationLabel(labelText: string | null | undefined) {
 export const getResultIcon = (result: ResultStatus) => {
   return (
     {
-      [ResultStatus.Success]: <InfoCircleIcon color="var(--pf-v5-global--success-color--100)" title="Success" />,
-      [ResultStatus.Running]: <OnRunningIcon color="var(--pf-v5-global--info-color--100)" title="Running" />,
-      [ResultStatus.Pending]: <PendingIcon color="var(--pf-v5-global--warning-color--100)" title="Pending" />,
-      [ResultStatus.Failed]: <ExclamationTriangleIcon color="var(--pf-v5-global--danger-color--100)" title="Error" />,
-      [ResultStatus.Warning]: <ExclamationCircleIcon color="var(--pf-v5-global--warning-color--100)" title="Warning" />,
+      [ResultStatus.Success]: (
+        <InfoCircleIcon color="var(--pf-t--global--icon--color--status--success)" title="Success" />
+      ),
+      [ResultStatus.Running]: <OnRunningIcon color="var(--pf-t--global--icon--color--status--info)" title="Running" />,
+      [ResultStatus.Pending]: <PendingIcon color="var(--pf-t--global--icon--color--status--warning)" title="Pending" />,
+      [ResultStatus.Failed]: (
+        <ExclamationTriangleIcon color="var(--pf-t--global--icon--color--status--danger)" title="Error" />
+      ),
+      [ResultStatus.Warning]: (
+        <ExclamationCircleIcon color="var(--pf-t--global--icon--color--status--warning)" title="Warning" />
+      ),
       [ResultStatus.Unknown]: <UnknownIcon color="gray" title="Unknown" />,
     }[result] || <UnknownIcon color="gray" title="Unknown" />
   );

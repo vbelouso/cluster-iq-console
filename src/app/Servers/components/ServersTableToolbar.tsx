@@ -392,27 +392,27 @@ export const ServersTableToolbar: React.FunctionComponent<ServersTableToolbarPro
           <ToolbarGroup variant="filter-group">
             <ToolbarItem>{attributeDropdown}</ToolbarItem>
             <ToolbarFilter
-              chips={searchValue !== '' ? [searchValue] : ([] as string[])}
-              deleteChip={() => setSearchValue('')}
-              deleteChipGroup={() => setSearchValue('')}
+              labels={searchValue !== '' ? [searchValue] : ([] as string[])}
+              deleteLabel={() => setSearchValue('')}
+              deleteLabelGroup={() => setSearchValue('')}
               categoryName="Name"
               showToolbarItem={activeAttributeMenu === 'Servers'}
             >
               {searchInput}
             </ToolbarFilter>
             <ToolbarFilter
-              chips={statusSelection ? [statusSelection] : []}
-              deleteChip={() => setStatusSelection(null)}
-              deleteChipGroup={() => setStatusSelection(null)}
+              labels={statusSelection ? [statusSelection] : []}
+              deleteLabel={() => setStatusSelection(null)}
+              deleteLabelGroup={() => setStatusSelection(null)}
               categoryName="Status"
               showToolbarItem={activeAttributeMenu === 'Status'}
             >
               {statusSelect}
             </ToolbarFilter>
             <ToolbarFilter
-              chips={providerSelections || []}
-              deleteChip={(_category, chip) => onProviderMenuSelect(undefined, chip as string)}
-              deleteChipGroup={() => setProviderSelections([])}
+              labels={providerSelections || []}
+              deleteLabel={(_category, chip) => onProviderMenuSelect(undefined, chip as string)}
+              deleteLabelGroup={() => setProviderSelections([])}
               categoryName="Provider"
               showToolbarItem={activeAttributeMenu === 'Provider'}
             >
@@ -424,7 +424,6 @@ export const ServersTableToolbar: React.FunctionComponent<ServersTableToolbarPro
           <Switch
             id="show-terminated-instances"
             label="Show terminated instances"
-            labelOff="Show terminated instances"
             isChecked={showTerminated}
             onChange={(_event, checked) => setShowTerminated(checked)}
           />

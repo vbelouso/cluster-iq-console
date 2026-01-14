@@ -1,15 +1,6 @@
 import React from 'react';
 import { ModalPowerManagement } from './components/ModalPowerManagement';
-import {
-  Flex,
-  FlexItem,
-  Button,
-  PageSection,
-  PageSectionVariants,
-  Panel,
-  TextContent,
-  Text,
-} from '@patternfly/react-core';
+import { Flex, FlexItem, Button, PageSection, Panel, Content } from '@patternfly/react-core';
 import ScheduleActionsTable from './components/ActionsTable';
 import ScheduleActionsTableToolbar from './components/ActionsToolBar';
 import { ActionOperations, ActionTypes, ActionStatus } from '@app/types/types';
@@ -42,12 +33,12 @@ const Scheduler: React.FunctionComponent = () => {
 
   return (
     <React.Fragment>
-      <PageSection variant={PageSectionVariants.light}>
+      <PageSection hasBodyWrapper={false}>
         <Flex justifyContent={{ default: 'justifyContentSpaceBetween' }} alignItems={{ default: 'alignItemsCenter' }}>
           <FlexItem>
-            <TextContent>
-              <Text component="h1">Scheduled Actions</Text>
-            </TextContent>
+            <Content>
+              <Content component="h1">Scheduled Actions</Content>
+            </Content>
           </FlexItem>
           <FlexItem>
             <Button variant="primary" onClick={onClick}>
@@ -56,7 +47,7 @@ const Scheduler: React.FunctionComponent = () => {
           </FlexItem>
         </Flex>
       </PageSection>
-      <PageSection variant={PageSectionVariants.light} isFilled>
+      <PageSection hasBodyWrapper={false} isFilled>
         <Panel>
           <ScheduleActionsTableToolbar
             searchValue={accountId}

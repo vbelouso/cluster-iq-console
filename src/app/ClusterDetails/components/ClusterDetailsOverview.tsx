@@ -11,9 +11,7 @@ import {
   DescriptionListTerm,
   DescriptionListDescription,
   TabContentBody,
-  Page,
   PageSection,
-  PageSectionVariants,
   Label,
   Divider,
   Tabs,
@@ -77,7 +75,7 @@ const ClusterDetailsOverview: React.FunctionComponent = () => {
       ) : (
         <Flex direction={{ default: 'column' }}>
           <FlexItem spacer={{ default: 'spacerLg' }}>
-            <Title headingLevel="h2" size="lg" className="pf-v5-u-mt-sm" id="open-tabs-example-tabs-list-details-title">
+            <Title headingLevel="h2" size="lg" className="pf-v6-u-mt-sm" id="open-tabs-example-tabs-list-details-title">
               Cluster details
             </Title>
           </FlexItem>
@@ -174,8 +172,8 @@ const ClusterDetailsOverview: React.FunctionComponent = () => {
   );
 
   return (
-    <Page>
-      <PageSection variant={PageSectionVariants.light}>
+    <React.Fragment>
+      <PageSection hasBodyWrapper={false}>
         <Flex
           spaceItems={{ default: 'spaceItemsMd' }}
           alignItems={{ default: 'alignItemsFlexStart' }}
@@ -197,7 +195,7 @@ const ClusterDetailsOverview: React.FunctionComponent = () => {
         </Flex>
         {/* Page tabs */}
       </PageSection>
-      <PageSection type="tabs" variant={PageSectionVariants.light}>
+      <PageSection hasBodyWrapper={false} type="tabs">
         <Divider />
         <Tabs activeKey={activeTabKey} onSelect={handleTabClick} usePageInsets id="open-tabs-example-tabs-list">
           <Tab eventKey={0} title={<TabTitleText>Details</TabTitleText>} tabContentId={`tabContent${0}`} />
@@ -205,7 +203,7 @@ const ClusterDetailsOverview: React.FunctionComponent = () => {
           <Tab eventKey={2} title={<TabTitleText>Events</TabTitleText>} tabContentId={`tabContent${2}`} />
         </Tabs>
       </PageSection>
-      <PageSection variant={PageSectionVariants.light}>
+      <PageSection hasBodyWrapper={false} isFilled>
         <TabContent key={0} eventKey={0} id={`tabContent${0}`} activeKey={activeTabKey} hidden={0 !== activeTabKey}>
           <TabContentBody>{detailsTabContent}</TabContentBody>
         </TabContent>
@@ -216,7 +214,7 @@ const ClusterDetailsOverview: React.FunctionComponent = () => {
           <TabContentBody>{eventsTabContent}</TabContentBody>
         </TabContent>
       </PageSection>
-    </Page>
+    </React.Fragment>
   );
 };
 export default ClusterDetailsOverview;

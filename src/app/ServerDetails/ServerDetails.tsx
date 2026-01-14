@@ -4,7 +4,6 @@ import { parseScanTimestamp, parseNumberToCurrency } from 'src/app/utils/parseFu
 import { useParams } from 'react-router-dom';
 import {
   PageSection,
-  PageSectionVariants,
   Tabs,
   Tab,
   TabContent,
@@ -18,9 +17,9 @@ import {
   Label,
   Flex,
   FlexItem,
-  Page,
-  Spinner,
   LabelGroup,
+  Bullseye,
+  Spinner,
 } from '@patternfly/react-core';
 import { api, InstanceResponseApi, TagResponseApi } from '@api';
 import { Link } from 'react-router-dom';
@@ -69,20 +68,13 @@ const ServerDetails: React.FunctionComponent = () => {
   const detailsTabContent = (
     <React.Fragment>
       {loading ? (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100vh',
-          }}
-        >
+        <Bullseye>
           <Spinner size="xl" />
-        </div>
+        </Bullseye>
       ) : (
         <Flex direction={{ default: 'column' }}>
           <FlexItem spacer={{ default: 'spacerLg' }}>
-            <Title headingLevel="h2" size="lg" className="pf-v5-u-mt-sm" id="open-tabs-example-tabs-list-details-title">
+            <Title headingLevel="h2" size="lg" className="pf-v6-u-mt-sm" id="open-tabs-example-tabs-list-details-title">
               Server details
             </Title>
           </FlexItem>
@@ -136,9 +128,9 @@ const ServerDetails: React.FunctionComponent = () => {
   );
 
   return (
-    <Page>
+    <React.Fragment>
       {/* Page header */}
-      <PageSection variant={PageSectionVariants.light}>
+      <PageSection hasBodyWrapper={false}>
         <Flex
           spaceItems={{ default: 'spaceItemsMd' }}
           alignItems={{ default: 'alignItemsFlexStart' }}
@@ -155,12 +147,12 @@ const ServerDetails: React.FunctionComponent = () => {
         </Flex>
         {/* Page tabs */}
       </PageSection>
-      <PageSection type="tabs" variant={PageSectionVariants.light}>
+      <PageSection hasBodyWrapper={false} type="tabs">
         <Tabs activeKey={activeTabKey} onSelect={handleTabClick} usePageInsets id="open-tabs-example-tabs-list">
           <Tab eventKey={0} title={<TabTitleText>Details</TabTitleText>} tabContentId={`tabContent${0}`} />
         </Tabs>
       </PageSection>
-      <PageSection variant={PageSectionVariants.light}>
+      <PageSection hasBodyWrapper={false} isFilled>
         <TabContent key={0} eventKey={0} id={`tabContent${0}`} activeKey={activeTabKey} hidden={0 !== activeTabKey}>
           <TabContentBody>{detailsTabContent}</TabContentBody>
         </TabContent>
@@ -172,7 +164,7 @@ const ServerDetails: React.FunctionComponent = () => {
           hidden={1 !== activeTabKey}
         ></TabContent>
       </PageSection>
-    </Page>
+    </React.Fragment>
   );
 };
 

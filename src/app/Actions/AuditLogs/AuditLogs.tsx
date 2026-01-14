@@ -1,5 +1,5 @@
 import React from 'react';
-import { PageSection, PageSectionVariants, Panel, Text, TextContent } from '@patternfly/react-core';
+import { PageSection, Panel, Content } from '@patternfly/react-core';
 import AuditLogsTableToolbar from './AuditLogsTableToolbar';
 import { parseAsArrayOf, parseAsString, parseAsStringEnum, useQueryStates } from 'nuqs';
 import { ActionOperations, ResultStatus } from '@app/types/types.tsx';
@@ -19,12 +19,12 @@ const AuditLogs: React.FunctionComponent = () => {
 
   return (
     <React.Fragment>
-      <PageSection variant={PageSectionVariants.light}>
-        <TextContent>
-          <Text component="h1">Audit logs</Text>
-        </TextContent>
+      <PageSection hasBodyWrapper={false}>
+        <Content>
+          <Content component="h1">Audit logs</Content>
+        </Content>
       </PageSection>
-      <PageSection variant={PageSectionVariants.light} isFilled>
+      <PageSection hasBodyWrapper={false} isFilled>
         <Panel>
           <AuditLogsTableToolbar
             searchValue={accountName}

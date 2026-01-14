@@ -7,10 +7,10 @@ import {
   TextInput,
   HelperText,
   HelperTextItem,
-  Modal,
-  ModalVariant,
   Radio,
 } from '@patternfly/react-core';
+import { ExclamationCircleIcon } from '@patternfly/react-icons';
+import { Modal, ModalVariant } from '@patternfly/react-core/deprecated';
 import React from 'react';
 import { ActionOperations, ActionTypes } from '@app/types/types';
 import DateTimePicker from './DateTimePicker';
@@ -43,6 +43,7 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
   const [scheduledDateTime, setScheduledDateTime] = React.useState('');
   const [showSchedule, setShowSchedule] = React.useState(false);
   const [cronExpression, setCronExpression] = React.useState('');
+  const [cronTouched, setCronTouched] = React.useState(false);
   const [description, setDescription] = React.useState<string>('');
   const [showDescriptionField, setShowDescriptionField] = React.useState(false);
 
@@ -143,6 +144,7 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
     setActionType(ActionTypes.INSTANT_ACTION);
     setScheduledDateTime('');
     setCronExpression('');
+    setCronTouched(false);
     setSelectedAccount(null);
     setSelectedCluster(null);
     setAllClusters([]);
@@ -316,13 +318,21 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
                   id="cron-expression-input"
                   value={cronExpression}
                   onChange={(_event, value) => setCronExpression(value)}
+                  onBlur={() => setCronTouched(true)}
+                  validated={cronTouched && !isValidCronExpression(cronExpression) ? 'error' : 'default'}
                   placeholder="0 0 * * *"
                 />
                 <FormHelperText>
                   <HelperText>
-                    <HelperTextItem>
-                      Format: minute hour day-of-month month day-of-week (e.g., &apos;0 0 * * *&apos; for daily at
-                      midnight)
+                    <HelperTextItem
+                      variant={cronTouched && !isValidCronExpression(cronExpression) ? 'error' : 'default'}
+                      icon={
+                        cronTouched && !isValidCronExpression(cronExpression) ? <ExclamationCircleIcon /> : undefined
+                      }
+                    >
+                      {cronTouched && !isValidCronExpression(cronExpression)
+                        ? 'Invalid cron expression'
+                        : "Format: minute hour day-of-month month day-of-week (e.g., '0 0 * * *' for daily at midnight)"}
                     </HelperTextItem>
                   </HelperText>
                 </FormHelperText>

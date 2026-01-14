@@ -1,5 +1,6 @@
 import React from 'react';
-import { Modal, ModalVariant, Button, Text } from '@patternfly/react-core';
+import { Button, Content } from '@patternfly/react-core';
+import { Modal, ModalVariant } from '@patternfly/react-core/deprecated';
 import { ActionOperations } from '@app/types/types';
 
 interface ClusterActionConfirmProps {
@@ -36,9 +37,9 @@ export const ClusterActionConfirm: React.FunctionComponent<ClusterActionConfirmP
         </Button>,
       ]}
     >
-      <Text>
+      <Content component="p">
         Are you sure you want to <strong>{actionOperation}</strong> the cluster <strong>{clusterId}</strong>?
-      </Text>
+      </Content>
     </Modal>
   );
 };

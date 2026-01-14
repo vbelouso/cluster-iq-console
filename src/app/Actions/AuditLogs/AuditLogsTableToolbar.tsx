@@ -553,45 +553,45 @@ export const AuditLogsTableToolbar: React.FunctionComponent<AuditLogsTableToolba
           <ToolbarGroup variant="filter-group">
             <ToolbarItem>{attributeDropdown}</ToolbarItem>
             <ToolbarFilter
-              chips={searchValue !== '' ? [searchValue] : []}
-              deleteChip={() => setSearchValue('')}
-              deleteChipGroup={() => setSearchValue('')}
+              labels={searchValue !== '' ? [searchValue] : []}
+              deleteLabel={() => setSearchValue('')}
+              deleteLabelGroup={() => setSearchValue('')}
               categoryName="Account"
               showToolbarItem={activeAttributeMenu === 'Account'}
             >
               {searchInput}
             </ToolbarFilter>
             <ToolbarFilter
-              chips={triggered_by !== '' ? [triggered_by] : []}
-              deleteChip={() => setTriggeredBy('')}
-              deleteChipGroup={() => setTriggeredBy('')}
+              labels={triggered_by !== '' ? [triggered_by] : []}
+              deleteLabel={() => setTriggeredBy('')}
+              deleteLabelGroup={() => setTriggeredBy('')}
               categoryName="TriggeredBy"
               showToolbarItem={activeAttributeMenu === 'TriggeredBy'}
             >
               {triggeredByInput}
             </ToolbarFilter>
             <ToolbarFilter
-              chips={result || []}
-              deleteChip={(_category, chip) => onResultMenuSelect(undefined, chip as string)}
-              deleteChipGroup={() => setResult([])}
+              labels={result || []}
+              deleteLabel={(_category, chip) => onResultMenuSelect(undefined, chip as string)}
+              deleteLabelGroup={() => setResult([])}
               categoryName="Result"
               showToolbarItem={activeAttributeMenu === 'Result'}
             >
               {resultSelect}
             </ToolbarFilter>
             <ToolbarFilter
-              chips={providerSelections || []}
-              deleteChip={(_category, chip) => onProviderMenuSelect(undefined, chip as string)}
-              deleteChipGroup={() => setProviderSelections([])}
+              labels={providerSelections || []}
+              deleteLabel={(_category, chip) => onProviderMenuSelect(undefined, chip as string)}
+              deleteLabelGroup={() => setProviderSelections([])}
               categoryName="Provider"
               showToolbarItem={activeAttributeMenu === 'Provider'}
             >
               {providerSelect}
             </ToolbarFilter>
             <ToolbarFilter
-              chips={action || []}
-              deleteChip={(_category, chip) => onActionMenuSelect(undefined, chip as string)}
-              deleteChipGroup={() => setAction([])}
+              labels={action || []}
+              deleteLabel={(_category, chip) => onActionMenuSelect(undefined, chip as string)}
+              deleteLabelGroup={() => setAction([])}
               categoryName="Action"
               showToolbarItem={activeAttributeMenu === 'Action'}
             >
