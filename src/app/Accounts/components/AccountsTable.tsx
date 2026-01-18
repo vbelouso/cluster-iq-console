@@ -1,11 +1,11 @@
 import { ThProps, Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { api, AccountResponseApi, ProviderApi } from '@api';
+import { AccountResponseApi, ProviderApi } from '@api';
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
 import { TablePagination } from '@app/components/common/TablesPagination';
 import { searchItems, filterByProvider, sortItems, paginateItems } from '@app/utils/tableFilters';
-import { fetchAllPages } from '@app/utils/fetchAllPages';
+import { useAccounts } from '@app/hooks/useAccounts';
 
 export const AccountsTable: React.FunctionComponent<{
   searchValue: string;
@@ -13,29 +13,10 @@ export const AccountsTable: React.FunctionComponent<{
 }> = ({ searchValue, providerSelections }) => {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(20);
-  const [allAccounts, setAllAccounts] = useState<AccountResponseApi[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: allAccounts = [], isLoading } = useAccounts();
 
   const [activeSortIndex, setActiveSortIndex] = useState<number | undefined>(0);
   const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const allItems = await fetchAllPages(async (page, pageSize) => {
-          const { data } = await api.accounts.accountsList({ page, page_size: pageSize });
-          return { items: data.items || [], count: data.count || 0 };
-        });
-        setAllAccounts(allItems);
-      } catch (error) {
-        console.error('Error fetching accounts:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
 
   let filtered = allAccounts;
   filtered = searchItems(filtered, searchValue, ['accountName']);
@@ -69,7 +50,7 @@ export const AccountsTable: React.FunctionComponent<{
 
   return (
     <>
-      {loading ? (
+      {isLoading ? (
         <LoadingSpinner />
       ) : (
         <Table aria-label="Accounts table">

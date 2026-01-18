@@ -1,15 +1,15 @@
 import { renderStatusLabel } from '@app/utils/renderUtils';
 import { EmptyState, EmptyStateVariant, EmptyStateBody, Title } from '@patternfly/react-core';
 import { ThProps, Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ServersTableProps } from '../types';
-import { api, InstanceResponseApi } from '@api';
+import { InstanceResponseApi } from '@api';
 import { TablePagination } from '@app/components/common/TablesPagination';
 import { searchItems, filterByStatus, filterByProvider, sortItems, paginateItems } from '@app/utils/tableFilters';
-import { fetchAllPages } from '@app/utils/fetchAllPages';
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
 import { ServerIcon } from '@patternfly/react-icons';
+import { useInstances } from '@app/hooks/useInstances';
 
 export const ServersTable: React.FunctionComponent<ServersTableProps> = ({
   searchValue,
@@ -19,29 +19,10 @@ export const ServersTable: React.FunctionComponent<ServersTableProps> = ({
 }) => {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
-  const [allInstances, setAllInstances] = useState<InstanceResponseApi[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: allInstances = [], isLoading } = useInstances();
 
   const [activeSortIndex, setActiveSortIndex] = useState<number | undefined>(1);
   const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const allItems = await fetchAllPages(async (page, pageSize) => {
-          const { data } = await api.instances.instancesList({ page, page_size: pageSize });
-          return { items: data.items || [], count: data.count || 0 };
-        });
-        setAllInstances(allItems);
-      } catch (error) {
-        console.error('Error fetching instances:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
 
   let filtered = allInstances;
 
@@ -93,7 +74,7 @@ export const ServersTable: React.FunctionComponent<ServersTableProps> = ({
     instanceType: 'Type',
   };
 
-  if (loading) {
+  if (isLoading) {
     return <LoadingSpinner />;
   }
 

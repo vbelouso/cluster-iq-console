@@ -1,16 +1,15 @@
 import { renderActionTypeLabel, renderOperationLabel, renderActionStatusLabel } from '@app/utils/renderUtils';
 import { Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
 import { Label } from '@patternfly/react-core';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ActionStatus, ActionOperations, ActionTypes } from '@app/types/types';
 import { Link } from 'react-router-dom';
-import { api, ActionResponseApi } from '@api';
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
 import { TablePagination } from '@app/components/common/TablesPagination';
 import { paginateItems } from '@app/utils/tableFilters';
-import { fetchAllPages } from '@app/utils/fetchAllPages';
 import { ActionsColumn } from '@patternfly/react-table';
 import { rowActions } from './ActionsKebabMenu';
+import { useScheduleActions, useInvalidateScheduleActions } from '@app/hooks/useScheduleActions';
 
 export const ScheduleActionsTable: React.FunctionComponent<{
   actionType: ActionTypes | null;
@@ -22,36 +21,17 @@ export const ScheduleActionsTable: React.FunctionComponent<{
 }> = ({ actionType, actionOperation, actionStatus, actionEnabled, accountId, reloadFlag }) => {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
-  const [allActions, setAllActions] = useState<ActionResponseApi[]>([]);
-  const [filteredActions, setFilteredActions] = useState<ActionResponseApi[]>([]);
-  const [filteredCount, setFilteredCount] = useState(0);
-  const [loading, setLoading] = useState(true);
 
-  // useEffect logic abstracted in this function to be reused in the kebab menu
-  const reloadActions = async () => {
-    setLoading(true);
-    try {
-      const allItems = await fetchAllPages(async (page, pageSize) => {
-        const { data } = await api.schedule.scheduleList({
-          page,
-          page_size: pageSize,
-        });
-        return { items: data.items || [], count: data.count || 0 };
-      });
-      setAllActions(allItems);
-    } catch (error) {
-      console.error('Error fetching ScheduleActions:', error);
-    } finally {
-      setLoading(false);
+  const { data: allActions = [], isLoading, refetch } = useScheduleActions();
+  const invalidateScheduleActions = useInvalidateScheduleActions();
+
+  useEffect(() => {
+    if (reloadFlag > 0) {
+      refetch();
     }
-  };
+  }, [reloadFlag, refetch]);
 
-  useEffect(() => {
-    reloadActions();
-  }, [reloadFlag]);
-
-  // Apply filters when data or filter props change
-  useEffect(() => {
+  const filteredData = useMemo(() => {
     let filtered = allActions;
 
     if (actionType) {
@@ -76,8 +56,10 @@ export const ScheduleActionsTable: React.FunctionComponent<{
       filtered = filtered.filter(item => item.enabled === actionEnabled);
     }
 
-    setFilteredCount(filtered.length);
-    setFilteredActions(paginateItems(filtered, page, perPage));
+    return {
+      count: filtered.length,
+      items: paginateItems(filtered, page, perPage),
+    };
   }, [allActions, actionType, accountId, actionOperation, actionStatus, actionEnabled, page, perPage]);
 
   const columnNames = {
@@ -95,7 +77,7 @@ export const ScheduleActionsTable: React.FunctionComponent<{
 
   return (
     <>
-      {loading ? (
+      {isLoading ? (
         <LoadingSpinner />
       ) : (
         <Table aria-label="ScheduleActions table">
@@ -114,7 +96,7 @@ export const ScheduleActionsTable: React.FunctionComponent<{
             </Tr>
           </Thead>
           <Tbody>
-            {filteredActions.map(action => (
+            {filteredData.items.map(action => (
               <Tr key={action.id}>
                 <Td dataLabel={columnNames.id}>{action.id}</Td>
                 <Td dataLabel={columnNames.type}>{renderActionTypeLabel(action.type)}</Td>
@@ -134,9 +116,8 @@ export const ScheduleActionsTable: React.FunctionComponent<{
                 <Td dataLabel={columnNames.enabled}>
                   {action.enabled ? <Label color="green">Enabled</Label> : <Label color="red">Disabled</Label>}
                 </Td>
-                {/* Kebab actions per row */}
                 <Td isActionCell aria-label="Row actions">
-                  <ActionsColumn items={rowActions(action, reloadActions)} />
+                  <ActionsColumn items={rowActions(action, invalidateScheduleActions)} />
                 </Td>
               </Tr>
             ))}
@@ -144,7 +125,7 @@ export const ScheduleActionsTable: React.FunctionComponent<{
         </Table>
       )}
       <TablePagination
-        itemCount={filteredCount}
+        itemCount={filteredData.count}
         page={page}
         perPage={perPage}
         onSetPage={setPage}

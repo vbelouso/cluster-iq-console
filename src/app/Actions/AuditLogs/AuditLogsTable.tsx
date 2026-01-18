@@ -1,8 +1,8 @@
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
 import { ActionOperations, ResultStatus } from '@app/types/types';
-import { api, SystemEventResponseApi } from '@api';
+import { SystemEventResponseApi } from '@api';
 import { Table, Tbody, Td, Th, Thead, Tr } from '@patternfly/react-table';
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import { getResultIcon, renderOperationLabel } from '@app/utils/renderUtils';
 import { useTableSort } from '@app/hooks/useTableSort.tsx';
 import { EmptyState } from '@patternfly/react-core';
@@ -11,6 +11,7 @@ import { paginateItems } from '@app/utils/tableFilters';
 import { SearchIcon } from '@patternfly/react-icons';
 import { AuditLogsTableProps } from './types';
 import { Link } from 'react-router-dom';
+import { useEvents } from '@app/hooks/useEvents';
 
 const columnNames = {
   action: 'Action',
@@ -34,33 +35,13 @@ export const AuditLogsTable: React.FunctionComponent<AuditLogsTableProps> = ({
   result,
   triggered_by,
 }) => {
-  // Pagination settings
   const [page, setPage] = React.useState(1);
   const [perPage, setPerPage] = React.useState(10);
-  const [filteredCount, setFilteredCount] = useState(0);
 
-  const [data, setData] = useState<SystemEventResponseApi[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filteredData, setFilteredData] = useState<SystemEventResponseApi[]>([]);
+  const { data: allEvents = [], isLoading } = useEvents();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const { data: systemEvents } = await api.events.eventsList();
-        setData(systemEvents.items || []);
-      } catch (error) {
-        console.error('Error fetching system wide events:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  // Apply filters when data or filter props change
-  useEffect(() => {
-    let filtered = data;
+  const filteredData = useMemo(() => {
+    let filtered = allEvents;
 
     if (accountName) {
       filtered = filtered.filter(event => event.accountId?.toLowerCase().includes(accountName.toLowerCase()));
@@ -82,9 +63,11 @@ export const AuditLogsTable: React.FunctionComponent<AuditLogsTableProps> = ({
       filtered = filtered.filter(event => event.triggeredBy?.toLowerCase().includes(triggered_by.toLowerCase()));
     }
 
-    setFilteredCount(filtered.length);
-    setFilteredData(paginateItems(filtered, page, perPage));
-  }, [data, accountName, action, provider, result, triggered_by, page, perPage]);
+    return {
+      count: filtered.length,
+      items: paginateItems(filtered, page, perPage),
+    };
+  }, [allEvents, accountName, action, provider, result, triggered_by, page, perPage]);
 
   const getSortableRowValues = (event: SystemEventResponseApi): (string | number | null)[] => {
     const { action, result, resourceId, accountId, provider, triggeredBy, description, timestamp } = event;
@@ -101,14 +84,14 @@ export const AuditLogsTable: React.FunctionComponent<AuditLogsTableProps> = ({
   };
 
   const { sortedData, getSortParams } = useTableSort<SystemEventResponseApi>(
-    filteredData,
+    filteredData.items,
     getSortableRowValues,
     7,
     'desc'
   );
 
-  if (loading) return <LoadingSpinner />;
-  if (filteredCount === 0) return <EmptyStateNoFound />;
+  if (isLoading) return <LoadingSpinner />;
+  if (filteredData.count === 0) return <EmptyStateNoFound />;
 
   return (
     <React.Fragment>
@@ -146,7 +129,6 @@ export const AuditLogsTable: React.FunctionComponent<AuditLogsTableProps> = ({
               <Td>{event.provider}</Td>
               <Td>{event.triggeredBy}</Td>
               <Td>{event.description}</Td>
-              {/*TODO. Hardcoded, adjust later if needed*/}
               <Td>
                 {getResultIcon(event.result as ResultStatus)} {event.result}
               </Td>
@@ -156,7 +138,7 @@ export const AuditLogsTable: React.FunctionComponent<AuditLogsTableProps> = ({
         </Tbody>
       </Table>
       <TablePagination
-        itemCount={filteredCount}
+        itemCount={filteredData.count}
         page={page}
         perPage={perPage}
         onSetPage={setPage}
