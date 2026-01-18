@@ -7,7 +7,6 @@ import { ServersTableProps } from '../types';
 import { api, InstanceResponseApi } from '@api';
 import { TablePagination } from '@app/components/common/TablesPagination';
 import { searchItems, filterByStatus, filterByProvider, sortItems, paginateItems } from '@app/utils/tableFilters';
-import { fetchAllPages } from '@app/utils/fetchAllPages';
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
 import { ServerIcon } from '@patternfly/react-icons';
 
@@ -26,21 +25,31 @@ export const ServersTable: React.FunctionComponent<ServersTableProps> = ({
   const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchData = async () => {
       try {
         setLoading(true);
-        const allItems = await fetchAllPages(async (page, pageSize) => {
-          const { data } = await api.instances.instancesList({ page, page_size: pageSize });
-          return { items: data.items || [], count: data.count || 0 };
-        });
-        setAllInstances(allItems);
+        const { data } = await api.instances.instancesList(
+          { page: 1, page_size: 10000 },
+          { signal: controller.signal }
+        );
+        if (!controller.signal.aborted) {
+          setAllInstances(data.items || []);
+        }
       } catch (error) {
-        console.error('Error fetching instances:', error);
+        if (!controller.signal.aborted) {
+          console.error('Error fetching instances:', error);
+        }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
+
     fetchData();
+    return () => controller.abort();
   }, []);
 
   let filtered = allInstances;

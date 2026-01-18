@@ -7,7 +7,6 @@ import { ClustersTableProps } from '../types';
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
 import { TablePagination } from '@app/components/common/TablesPagination';
 import { searchItems, filterByStatus, filterByProvider, sortItems, paginateItems } from '@app/utils/tableFilters';
-import { fetchAllPages } from '@app/utils/fetchAllPages';
 import { EmptyState, EmptyStateVariant, EmptyStateBody, Title } from '@patternfly/react-core';
 import { CubesIcon } from '@patternfly/react-icons';
 
@@ -27,21 +26,28 @@ export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
   const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchData = async () => {
       try {
         setLoading(true);
-        const allItems = await fetchAllPages(async (page, pageSize) => {
-          const { data } = await api.clusters.clustersList({ page, page_size: pageSize });
-          return { items: data.items || [], count: data.count || 0 };
-        });
-        setAllClusters(allItems);
+        const { data } = await api.clusters.clustersList({ page: 1, page_size: 10000 }, { signal: controller.signal });
+        if (!controller.signal.aborted) {
+          setAllClusters(data.items || []);
+        }
       } catch (error) {
-        console.error('Error fetching clusters:', error);
+        if (!controller.signal.aborted) {
+          console.error('Error fetching clusters:', error);
+        }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
+
     fetchData();
+    return () => controller.abort();
   }, []);
 
   let processed = allClusters;

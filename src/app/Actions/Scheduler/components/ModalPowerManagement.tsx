@@ -20,7 +20,6 @@ import { ActionStatus } from '@app/types/types';
 import { useUser } from '@app/Contexts/UserContext.tsx';
 import { debug } from '@app/utils/debugLogs';
 import { api, startCluster, stopCluster, AccountResponseApi, ClusterResponseApi, ActionRequestApi } from '@api';
-import { fetchAllPages } from '@app/utils/fetchAllPages';
 import cronValidate from 'cron-validate';
 
 interface ModalPowerManagementProps {
@@ -85,53 +84,53 @@ export const ModalPowerManagement: React.FunctionComponent<ModalPowerManagementP
   React.useEffect(() => {
     if (!isOpen) return;
 
+    const controller = new AbortController();
+
     const fetchAccounts = async () => {
-      //setLoading(true);
       try {
-        const accountFullList = await fetchAllPages(async (page, pageSize) => {
-          const { data } = await api.accounts.accountsList({ page, page_size: pageSize });
-          return { items: data.items || [], count: data.count || 0 };
-        });
-        setAllAccounts(accountFullList);
+        const { data } = await api.accounts.accountsList({ page: 1, page_size: 10000 }, { signal: controller.signal });
+        if (!controller.signal.aborted) {
+          setAllAccounts(data.items || []);
+        }
       } catch (error) {
-        console.error('Error fetching accounts:', error);
-        setAllAccounts([]);
-      } finally {
-        //setLoading(false);
+        if (!controller.signal.aborted) {
+          console.error('Error fetching accounts:', error);
+          setAllAccounts([]);
+        }
       }
     };
 
     fetchAccounts();
+    return () => controller.abort();
   }, [isOpen]);
 
-  // Reload clusters every time the selected account changes.
   React.useEffect(() => {
     if (!isOpen) return;
 
-    // Reset dependent state when account changes / clears
     setSelectedCluster(null);
     setAllClusters([]);
 
     const accountId = selectedAccount?.accountId;
     if (!accountId) return;
 
+    const controller = new AbortController();
+
     const fetchClusters = async () => {
-      //setLoading(true);
       try {
-        const clusterFullList = await fetchAllPages(async (page, pageSize) => {
-          const { data } = await api.accounts.clustersList(accountId, { page, page_size: pageSize });
-          return { items: data.items || [], count: data.count || 0 };
-        });
-        setAllClusters(clusterFullList);
+        const { data } = await api.accounts.clustersList(accountId, { signal: controller.signal });
+        if (!controller.signal.aborted) {
+          setAllClusters(data.items || []);
+        }
       } catch (error) {
-        console.error('Error fetching clusters:', error);
-        setAllClusters([]);
-      } finally {
-        //setLoading(false);
+        if (!controller.signal.aborted) {
+          console.error('Error fetching clusters:', error);
+          setAllClusters([]);
+        }
       }
     };
 
     fetchClusters();
+    return () => controller.abort();
   }, [isOpen, selectedAccount?.accountId]);
 
   // Reset modal state when closing to avoid leaking previous selections.

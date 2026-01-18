@@ -5,7 +5,6 @@ import { api, AccountResponseApi, ProviderApi } from '@api';
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
 import { TablePagination } from '@app/components/common/TablesPagination';
 import { searchItems, filterByProvider, sortItems, paginateItems } from '@app/utils/tableFilters';
-import { fetchAllPages } from '@app/utils/fetchAllPages';
 
 export const AccountsTable: React.FunctionComponent<{
   searchValue: string;
@@ -20,21 +19,28 @@ export const AccountsTable: React.FunctionComponent<{
   const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchData = async () => {
-      setLoading(true);
       try {
-        const allItems = await fetchAllPages(async (page, pageSize) => {
-          const { data } = await api.accounts.accountsList({ page, page_size: pageSize });
-          return { items: data.items || [], count: data.count || 0 };
-        });
-        setAllAccounts(allItems);
+        setLoading(true);
+        const { data } = await api.accounts.accountsList({ page: 1, page_size: 10000 }, { signal: controller.signal });
+        if (!controller.signal.aborted) {
+          setAllAccounts(data.items || []);
+        }
       } catch (error) {
-        console.error('Error fetching accounts:', error);
+        if (!controller.signal.aborted) {
+          console.error('Error fetching accounts:', error);
+        }
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
+
     fetchData();
+    return () => controller.abort();
   }, []);
 
   let filtered = allAccounts;

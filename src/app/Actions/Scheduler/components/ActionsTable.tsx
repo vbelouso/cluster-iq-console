@@ -1,14 +1,13 @@
 import { renderActionTypeLabel, renderOperationLabel, renderActionStatusLabel } from '@app/utils/renderUtils';
 import { Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
 import { Label } from '@patternfly/react-core';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ActionStatus, ActionOperations, ActionTypes } from '@app/types/types';
 import { Link } from 'react-router-dom';
 import { api, ActionResponseApi } from '@api';
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
 import { TablePagination } from '@app/components/common/TablesPagination';
 import { paginateItems } from '@app/utils/tableFilters';
-import { fetchAllPages } from '@app/utils/fetchAllPages';
 import { ActionsColumn } from '@patternfly/react-table';
 import { rowActions } from './ActionsKebabMenu';
 
@@ -26,29 +25,38 @@ export const ScheduleActionsTable: React.FunctionComponent<{
   const [filteredActions, setFilteredActions] = useState<ActionResponseApi[]>([]);
   const [filteredCount, setFilteredCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const controllerRef = useRef<AbortController | null>(null);
 
-  // useEffect logic abstracted in this function to be reused in the kebab menu
-  const reloadActions = async () => {
+  const reloadActions = useCallback(async () => {
+    if (controllerRef.current) {
+      controllerRef.current.abort();
+    }
+    controllerRef.current = new AbortController();
+
     setLoading(true);
     try {
-      const allItems = await fetchAllPages(async (page, pageSize) => {
-        const { data } = await api.schedule.scheduleList({
-          page,
-          page_size: pageSize,
-        });
-        return { items: data.items || [], count: data.count || 0 };
-      });
-      setAllActions(allItems);
+      const { data } = await api.schedule.scheduleList(
+        { page: 1, page_size: 10000 },
+        { signal: controllerRef.current.signal }
+      );
+      if (!controllerRef.current.signal.aborted) {
+        setAllActions(data.items || []);
+      }
     } catch (error) {
-      console.error('Error fetching ScheduleActions:', error);
+      if (!controllerRef.current?.signal.aborted) {
+        console.error('Error fetching ScheduleActions:', error);
+      }
     } finally {
-      setLoading(false);
+      if (!controllerRef.current?.signal.aborted) {
+        setLoading(false);
+      }
     }
-  };
+  }, []);
 
   useEffect(() => {
     reloadActions();
-  }, [reloadFlag]);
+    return () => controllerRef.current?.abort();
+  }, [reloadFlag, reloadActions]);
 
   // Apply filters when data or filter props change
   useEffect(() => {
