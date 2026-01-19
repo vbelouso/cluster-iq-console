@@ -7,11 +7,11 @@ import { getResultIcon, renderOperationLabel } from '@app/utils/renderUtils';
 import { useTableSort } from '@app/hooks/useTableSort.tsx';
 import { EmptyState } from '@patternfly/react-core';
 import { TablePagination } from '@app/components/common/TablesPagination';
-import { paginateItems } from '@app/utils/tableFilters';
 import { SearchIcon } from '@patternfly/react-icons';
 import { AuditLogsTableProps } from './types';
 import { Link } from 'react-router-dom';
 import { useEvents } from '@app/hooks/useEvents';
+import { useTablePagination } from '@app/hooks/useTablePagination';
 
 const columnNames = {
   action: 'Action',
@@ -35,39 +35,42 @@ export const AuditLogsTable: React.FunctionComponent<AuditLogsTableProps> = ({
   result,
   triggered_by,
 }) => {
-  const [page, setPage] = React.useState(1);
-  const [perPage, setPerPage] = React.useState(10);
-
   const { data: allEvents = [], isLoading } = useEvents();
 
-  const filteredData = useMemo(() => {
-    let filtered = allEvents;
+  const filtered = useMemo(() => {
+    let filteredResult = allEvents;
 
     if (accountName) {
-      filtered = filtered.filter(event => event.accountId?.toLowerCase().includes(accountName.toLowerCase()));
+      filteredResult = filteredResult.filter(event =>
+        event.accountId?.toLowerCase().includes(accountName.toLowerCase())
+      );
     }
 
     if (action?.length) {
-      filtered = filtered.filter(event => action.includes(event.action as ActionOperations));
+      filteredResult = filteredResult.filter(event => action.includes(event.action as ActionOperations));
     }
 
     if (provider?.length) {
-      filtered = filtered.filter(event => event.provider && provider.some(p => p === event.provider));
+      filteredResult = filteredResult.filter(event => event.provider && provider.some(p => p === event.provider));
     }
 
     if (result?.length) {
-      filtered = filtered.filter(event => result.includes(event.result as ResultStatus));
+      filteredResult = filteredResult.filter(event => result.includes(event.result as ResultStatus));
     }
 
     if (triggered_by) {
-      filtered = filtered.filter(event => event.triggeredBy?.toLowerCase().includes(triggered_by.toLowerCase()));
+      filteredResult = filteredResult.filter(event =>
+        event.triggeredBy?.toLowerCase().includes(triggered_by.toLowerCase())
+      );
     }
 
-    return {
-      count: filtered.length,
-      items: paginateItems(filtered, page, perPage),
-    };
-  }, [allEvents, accountName, action, provider, result, triggered_by, page, perPage]);
+    return filteredResult;
+  }, [allEvents, accountName, action, provider, result, triggered_by]);
+
+  const { page, perPage, setPage, setPerPage, paginatedData, totalItems } = useTablePagination({
+    data: filtered,
+    filterDeps: [accountName, action, provider, result, triggered_by],
+  });
 
   const getSortableRowValues = (event: SystemEventResponseApi): (string | number | null)[] => {
     const { action, result, resourceId, accountId, provider, triggeredBy, description, timestamp } = event;
@@ -84,14 +87,14 @@ export const AuditLogsTable: React.FunctionComponent<AuditLogsTableProps> = ({
   };
 
   const { sortedData, getSortParams } = useTableSort<SystemEventResponseApi>(
-    filteredData.items,
+    paginatedData,
     getSortableRowValues,
     7,
     'desc'
   );
 
   if (isLoading) return <LoadingSpinner />;
-  if (filteredData.count === 0) return <EmptyStateNoFound />;
+  if (totalItems === 0) return <EmptyStateNoFound />;
 
   return (
     <React.Fragment>
@@ -138,7 +141,7 @@ export const AuditLogsTable: React.FunctionComponent<AuditLogsTableProps> = ({
         </Tbody>
       </Table>
       <TablePagination
-        itemCount={filteredData.count}
+        itemCount={totalItems}
         page={page}
         perPage={perPage}
         onSetPage={setPage}

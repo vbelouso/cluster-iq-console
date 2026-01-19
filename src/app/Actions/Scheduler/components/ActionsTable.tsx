@@ -1,15 +1,15 @@
 import { renderActionTypeLabel, renderOperationLabel, renderActionStatusLabel } from '@app/utils/renderUtils';
 import { Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
 import { Label } from '@patternfly/react-core';
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { ActionStatus, ActionOperations, ActionTypes } from '@app/types/types';
 import { Link } from 'react-router-dom';
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
 import { TablePagination } from '@app/components/common/TablesPagination';
-import { paginateItems } from '@app/utils/tableFilters';
 import { ActionsColumn } from '@patternfly/react-table';
 import { rowActions } from './ActionsKebabMenu';
 import { useScheduleActions, useInvalidateScheduleActions } from '@app/hooks/useScheduleActions';
+import { useTablePagination } from '@app/hooks/useTablePagination';
 
 export const ScheduleActionsTable: React.FunctionComponent<{
   actionType: ActionTypes | null;
@@ -19,9 +19,6 @@ export const ScheduleActionsTable: React.FunctionComponent<{
   accountId: string | null;
   reloadFlag: number;
 }> = ({ actionType, actionOperation, actionStatus, actionEnabled, accountId, reloadFlag }) => {
-  const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(10);
-
   const { data: allActions = [], isLoading, refetch } = useScheduleActions();
   const invalidateScheduleActions = useInvalidateScheduleActions();
 
@@ -31,36 +28,38 @@ export const ScheduleActionsTable: React.FunctionComponent<{
     }
   }, [reloadFlag, refetch]);
 
-  const filteredData = useMemo(() => {
-    let filtered = allActions;
+  const filtered = useMemo(() => {
+    let result = allActions;
 
     if (actionType) {
-      filtered = filtered.filter(item => item.type === actionType);
+      result = result.filter(item => item.type === actionType);
     }
 
     if (accountId) {
-      filtered = filtered.filter(item => item.accountId?.includes(accountId));
+      result = result.filter(item => item.accountId?.includes(accountId));
     }
 
     if (actionOperation?.length) {
-      filtered = filtered.filter(item => {
+      result = result.filter(item => {
         return actionOperation.includes(item.operation as never);
       });
     }
 
     if (actionStatus) {
-      filtered = filtered.filter(item => item.status === actionStatus);
+      result = result.filter(item => item.status === actionStatus);
     }
 
     if (actionEnabled !== null) {
-      filtered = filtered.filter(item => item.enabled === actionEnabled);
+      result = result.filter(item => item.enabled === actionEnabled);
     }
 
-    return {
-      count: filtered.length,
-      items: paginateItems(filtered, page, perPage),
-    };
-  }, [allActions, actionType, accountId, actionOperation, actionStatus, actionEnabled, page, perPage]);
+    return result;
+  }, [allActions, actionType, accountId, actionOperation, actionStatus, actionEnabled]);
+
+  const { page, perPage, setPage, setPerPage, paginatedData, totalItems } = useTablePagination({
+    data: filtered,
+    filterDeps: [actionType, actionOperation, actionStatus, actionEnabled, accountId],
+  });
 
   const columnNames = {
     id: 'ID',
@@ -96,7 +95,7 @@ export const ScheduleActionsTable: React.FunctionComponent<{
             </Tr>
           </Thead>
           <Tbody>
-            {filteredData.items.map(action => (
+            {paginatedData.map(action => (
               <Tr key={action.id}>
                 <Td dataLabel={columnNames.id}>{action.id}</Td>
                 <Td dataLabel={columnNames.type}>{renderActionTypeLabel(action.type)}</Td>
@@ -125,7 +124,7 @@ export const ScheduleActionsTable: React.FunctionComponent<{
         </Table>
       )}
       <TablePagination
-        itemCount={filteredData.count}
+        itemCount={totalItems}
         page={page}
         perPage={perPage}
         onSetPage={setPage}
