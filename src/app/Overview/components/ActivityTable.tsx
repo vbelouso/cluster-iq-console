@@ -4,35 +4,13 @@ import { EmptyState } from '@patternfly/react-core';
 import { SystemEventResponseApi } from '@api';
 import { Link } from 'react-router-dom';
 import { resolveResourcePath } from '@app/utils/parseFuncs';
-import { CheckCircleIcon, ErrorCircleOIcon, WarningTriangleIcon, InboxIcon } from '@patternfly/react-icons';
+import { InboxIcon } from '@patternfly/react-icons';
+import { getResultIcon } from '@app/utils/renderUtils';
+import { ResultStatus } from '@app/types/types';
 
 interface ActivityTableProps {
   events: SystemEventResponseApi[];
 }
-
-const getResultIcon = (result: string) => {
-  const PATTERNFLY_COLORS = {
-    success: 'var(--pf-t--global--color--status--success--default)',
-    danger: 'var(--pf-t--global--color--status--danger--default)',
-    warning: 'var(--pf-t--global--color--status--warning--default)',
-  } as const;
-
-  switch (result.toLowerCase()) {
-    case 'ok':
-    case 'success':
-      return <CheckCircleIcon color={PATTERNFLY_COLORS.success} />;
-    case 'failed':
-    case 'failure':
-    case 'error':
-      return <ErrorCircleOIcon color={PATTERNFLY_COLORS.danger} />;
-    case 'warning':
-    case 'partial':
-    case 'pending':
-      return <WarningTriangleIcon color={PATTERNFLY_COLORS.warning} />;
-    default:
-      return <WarningTriangleIcon color={PATTERNFLY_COLORS.warning} />;
-  }
-};
 
 export const ActivityTable: React.FunctionComponent<ActivityTableProps> = ({ events }) => {
   if (events.length === 0) {
@@ -56,7 +34,7 @@ export const ActivityTable: React.FunctionComponent<ActivityTableProps> = ({ eve
             <Td>{event.timestamp ? new Date(event.timestamp).toLocaleString('es-ES') : '-'}</Td>
             <Td>{event.action}</Td>
             <Td>
-              {getResultIcon(event.result)} {event.result}
+              {getResultIcon(event.result as ResultStatus)} {event.result}
             </Td>
             <Td>
               <Link to={resolveResourcePath(event.resourceType ?? '-', event.resourceId ?? '-')}>

@@ -58,6 +58,7 @@ export const ClusterTypeaheadSelect: React.FunctionComponent<ClusterTypeaheadSel
       <Select
         id="cluster-typeahead"
         isOpen={isOpen}
+        isScrollable={true}
         onOpenChange={setIsOpen}
         onSelect={onSelect}
         selected={selectedCluster?.clusterId ?? null}

@@ -1,15 +1,16 @@
 import { renderStatusLabel } from '@app/utils/renderUtils';
 import { ThProps, Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { api, ClusterResponseApi } from '@api';
+import { ClusterResponseApi } from '@api';
 import { ClustersTableProps } from '../types';
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
 import { TablePagination } from '@app/components/common/TablesPagination';
-import { searchItems, filterByStatus, filterByProvider, sortItems, paginateItems } from '@app/utils/tableFilters';
-import { fetchAllPages } from '@app/utils/fetchAllPages';
+import { searchItems, filterByStatus, filterByProvider, sortItems } from '@app/utils/tableFilters';
 import { EmptyState, EmptyStateVariant, EmptyStateBody, Title } from '@patternfly/react-core';
 import { CubesIcon } from '@patternfly/react-icons';
+import { useClusters } from '@app/hooks/useClusters';
+import { useTablePagination } from '@app/hooks/useTablePagination';
 
 export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
   clusterNameSearch,
@@ -18,64 +19,59 @@ export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
   providerSelections,
   showTerminated,
 }) => {
-  const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(10);
-  const [allClusters, setAllClusters] = useState<ClusterResponseApi[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: allClusters = [], isLoading } = useClusters();
 
   const [activeSortIndex, setActiveSortIndex] = useState<number | undefined>(0);
   const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const allItems = await fetchAllPages(async (page, pageSize) => {
-          const { data } = await api.clusters.clustersList({ page, page_size: pageSize });
-          return { items: data.items || [], count: data.count || 0 };
-        });
-        setAllClusters(allItems);
-      } catch (error) {
-        console.error('Error fetching clusters:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+  const filtered = useMemo(() => {
+    let processed = allClusters;
 
-  let processed = allClusters;
+    if (!showTerminated) {
+      processed = processed.filter(cluster => cluster.status !== 'Terminated');
+    }
 
-  if (!showTerminated) {
-    processed = processed.filter(cluster => cluster.status !== 'Terminated');
-  }
+    if (clusterNameSearch) {
+      processed = searchItems(processed, clusterNameSearch, ['clusterName']);
+    }
 
-  if (clusterNameSearch) {
-    processed = searchItems(processed, clusterNameSearch, ['clusterName']);
-  }
+    if (accountNameSearch) {
+      processed = searchItems(processed, accountNameSearch, ['accountName']);
+    }
 
-  if (accountNameSearch) {
-    processed = searchItems(processed, accountNameSearch, ['accountName']);
-  }
+    processed = filterByStatus(processed, statusFilter);
+    processed = filterByProvider(processed, providerSelections);
 
-  processed = filterByStatus(processed, statusFilter);
-  processed = filterByProvider(processed, providerSelections);
+    if (activeSortIndex !== undefined && activeSortDirection) {
+      const sortFields: (keyof ClusterResponseApi)[] = [
+        'clusterId',
+        'clusterName',
+        'status',
+        'accountId',
+        'provider',
+        'region',
+        'instanceCount',
+        'consoleLink',
+      ];
+      processed = sortItems(processed, sortFields[activeSortIndex], activeSortDirection);
+    }
 
-  if (activeSortIndex !== undefined && activeSortDirection) {
-    const sortFields: (keyof ClusterResponseApi)[] = [
-      'clusterId',
-      'clusterName',
-      'status',
-      'accountId',
-      'provider',
-      'region',
-      'instanceCount',
-      'consoleLink',
-    ];
-    processed = sortItems(processed, sortFields[activeSortIndex], activeSortDirection);
-  }
+    return processed;
+  }, [
+    allClusters,
+    showTerminated,
+    clusterNameSearch,
+    accountNameSearch,
+    statusFilter,
+    providerSelections,
+    activeSortIndex,
+    activeSortDirection,
+  ]);
 
-  const paginated = paginateItems(processed, page, perPage);
+  const { page, perPage, setPage, setPerPage, paginatedData, totalItems } = useTablePagination({
+    data: filtered,
+    filterDeps: [clusterNameSearch, accountNameSearch, statusFilter, providerSelections, showTerminated],
+  });
 
   const columnNames = {
     id: 'ID',
@@ -101,11 +97,11 @@ export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
     columnIndex,
   });
 
-  if (loading) {
+  if (isLoading) {
     return <LoadingSpinner />;
   }
 
-  if (processed.length === 0) {
+  if (filtered.length === 0) {
     return (
       <EmptyState
         titleText={
@@ -147,7 +143,7 @@ export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
           </Tr>
         </Thead>
         <Tbody>
-          {paginated.map(cluster => (
+          {paginatedData.map(cluster => (
             <Tr key={cluster.clusterId}>
               <Td dataLabel={columnNames.id}>
                 <Link to={`/clusters/${cluster.clusterId}`}>{cluster.clusterId}</Link>
@@ -170,7 +166,7 @@ export const ClustersTable: React.FunctionComponent<ClustersTableProps> = ({
         </Tbody>
       </Table>
       <TablePagination
-        itemCount={processed.length}
+        itemCount={totalItems}
         page={page}
         perPage={perPage}
         onSetPage={setPage}

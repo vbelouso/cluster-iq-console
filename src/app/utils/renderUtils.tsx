@@ -1,4 +1,3 @@
-import React from 'react';
 import { ActionTypes, ActionStatus, ActionOperations, ResultStatus } from '@app/types/types';
 import { ResourceStatusApi } from '@api';
 import { Label } from '@patternfly/react-core';
@@ -67,15 +66,19 @@ export const getResultIcon = (result: ResultStatus) => {
   return (
     {
       [ResultStatus.Success]: (
-        <InfoCircleIcon color="var(--pf-t--global--icon--color--status--success)" title="Success" />
+        <InfoCircleIcon color="var(--pf-t--global--color--status--success--default)" title="Success" />
       ),
-      [ResultStatus.Running]: <OnRunningIcon color="var(--pf-t--global--icon--color--status--info)" title="Running" />,
-      [ResultStatus.Pending]: <PendingIcon color="var(--pf-t--global--icon--color--status--warning)" title="Pending" />,
+      [ResultStatus.Running]: (
+        <OnRunningIcon color="var(--pf-t--global--color--status--info--default)" title="Running" />
+      ),
+      [ResultStatus.Pending]: (
+        <PendingIcon color="var(--pf-t--global--color--status--warning--default)" title="Pending" />
+      ),
       [ResultStatus.Failed]: (
-        <ExclamationTriangleIcon color="var(--pf-t--global--icon--color--status--danger)" title="Error" />
+        <ExclamationTriangleIcon color="var(--pf-t--global--color--status--danger--default)" title="Error" />
       ),
       [ResultStatus.Warning]: (
-        <ExclamationCircleIcon color="var(--pf-t--global--icon--color--status--warning)" title="Warning" />
+        <ExclamationCircleIcon color="var(--pf-t--global--color--status--warning--default)" title="Warning" />
       ),
       [ResultStatus.Unknown]: <UnknownIcon color="gray" title="Unknown" />,
     }[result] || <UnknownIcon color="gray" title="Unknown" />

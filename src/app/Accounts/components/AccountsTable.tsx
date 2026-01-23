@@ -1,52 +1,40 @@
 import { ThProps, Table, Thead, Tr, Th, Tbody, Td } from '@patternfly/react-table';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { api, AccountResponseApi, ProviderApi } from '@api';
+import { AccountResponseApi, ProviderApi } from '@api';
 import { LoadingSpinner } from '@app/components/common/LoadingSpinner';
 import { TablePagination } from '@app/components/common/TablesPagination';
-import { searchItems, filterByProvider, sortItems, paginateItems } from '@app/utils/tableFilters';
-import { fetchAllPages } from '@app/utils/fetchAllPages';
+import { searchItems, filterByProvider, sortItems } from '@app/utils/tableFilters';
+import { useAccounts } from '@app/hooks/useAccounts';
+import { useTablePagination } from '@app/hooks/useTablePagination';
 
 export const AccountsTable: React.FunctionComponent<{
   searchValue: string;
   providerSelections: ProviderApi[] | null;
 }> = ({ searchValue, providerSelections }) => {
-  const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(20);
-  const [allAccounts, setAllAccounts] = useState<AccountResponseApi[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: allAccounts = [], isLoading } = useAccounts();
 
   const [activeSortIndex, setActiveSortIndex] = useState<number | undefined>(0);
   const [activeSortDirection, setActiveSortDirection] = useState<'asc' | 'desc'>('asc');
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const allItems = await fetchAllPages(async (page, pageSize) => {
-          const { data } = await api.accounts.accountsList({ page, page_size: pageSize });
-          return { items: data.items || [], count: data.count || 0 };
-        });
-        setAllAccounts(allItems);
-      } catch (error) {
-        console.error('Error fetching accounts:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+  const filtered = useMemo(() => {
+    let result = allAccounts;
+    result = searchItems(result, searchValue, ['accountName']);
+    result = filterByProvider(result, providerSelections);
 
-  let filtered = allAccounts;
-  filtered = searchItems(filtered, searchValue, ['accountName']);
-  filtered = filterByProvider(filtered, providerSelections);
+    if (activeSortIndex !== undefined && activeSortDirection) {
+      const sortFields: (keyof AccountResponseApi)[] = ['accountName', 'provider', 'clusterCount'];
+      result = sortItems(result, sortFields[activeSortIndex], activeSortDirection);
+    }
 
-  if (activeSortIndex !== undefined && activeSortDirection) {
-    const sortFields: (keyof AccountResponseApi)[] = ['accountName', 'provider', 'clusterCount'];
-    filtered = sortItems(filtered, sortFields[activeSortIndex], activeSortDirection);
-  }
+    return result;
+  }, [allAccounts, searchValue, providerSelections, activeSortIndex, activeSortDirection]);
 
-  const paginated = paginateItems(filtered, page, perPage);
+  const { page, perPage, setPage, setPerPage, paginatedData, totalItems } = useTablePagination({
+    data: filtered,
+    initialPerPage: 20,
+    filterDeps: [searchValue, providerSelections],
+  });
 
   const getSortParams = (columnIndex: number): ThProps['sort'] => ({
     sortBy: {
@@ -69,7 +57,7 @@ export const AccountsTable: React.FunctionComponent<{
 
   return (
     <>
-      {loading ? (
+      {isLoading ? (
         <LoadingSpinner />
       ) : (
         <Table aria-label="Accounts table">
@@ -81,7 +69,7 @@ export const AccountsTable: React.FunctionComponent<{
             </Tr>
           </Thead>
           <Tbody>
-            {paginated.map(account => (
+            {paginatedData.map(account => (
               <Tr key={account.accountId}>
                 <Td dataLabel={columnNames.name}>
                   <Link to={`/accounts/${account.accountId}`}>{account.accountName}</Link>
@@ -94,7 +82,7 @@ export const AccountsTable: React.FunctionComponent<{
         </Table>
       )}
       <TablePagination
-        itemCount={filtered.length}
+        itemCount={totalItems}
         page={page}
         perPage={perPage}
         onSetPage={setPage}

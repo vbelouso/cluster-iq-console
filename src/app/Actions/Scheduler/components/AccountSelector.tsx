@@ -56,6 +56,7 @@ export const AccountTypeaheadSelect: React.FunctionComponent<AccountTypeaheadSel
       <Select
         id="account-typeahead"
         isOpen={isOpen}
+        isScrollable={true}
         onOpenChange={setIsOpen}
         onSelect={onSelect}
         selected={selectedAccount?.accountId ?? null}
