@@ -87,7 +87,9 @@ const ClusterDetailsOverview: React.FunctionComponent = () => {
             >
               <DescriptionListGroup name="Basic Info">
                 <DescriptionListTerm>Name</DescriptionListTerm>
-                <DescriptionListDescription>{clusterID}</DescriptionListDescription>
+                <DescriptionListDescription>{cluster?.clusterName}</DescriptionListDescription>
+                <DescriptionListTerm>Infrastructure ID</DescriptionListTerm>
+                <DescriptionListDescription>{cluster?.infraId}</DescriptionListDescription>
                 <DescriptionListTerm>Status</DescriptionListTerm>
                 <DescriptionListDescription>{renderStatusLabel(cluster?.status)}</DescriptionListDescription>
               </DescriptionListGroup>
@@ -119,6 +121,8 @@ const ClusterDetailsOverview: React.FunctionComponent = () => {
                 <DescriptionListDescription>
                   {parseScanTimestamp(cluster?.lastScanTimestamp)}
                 </DescriptionListDescription>
+                <DescriptionListTerm>Age (days)</DescriptionListTerm>
+                <DescriptionListDescription>{cluster?.age}</DescriptionListDescription>
               </DescriptionListGroup>
 
               <DescriptionListGroup name="Extra metadata">
